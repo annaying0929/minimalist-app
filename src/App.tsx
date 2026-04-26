@@ -17,7 +17,7 @@ export default function App() {
   const [page, setPage] = useState<Page>('dashboard')
   const [modalOpen, setModalOpen] = useState(false)
   const [modalCategoryId, setModalCategoryId] = useState<string | undefined>()
-  const { entries, loading, addEntry, deleteEntry } = useStore()
+  const { entries, loading, saveError, addEntry, deleteEntry } = useStore(session?.user.id)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
@@ -63,6 +63,11 @@ export default function App() {
         onLogEntry={() => openModal()}
         onSignOut={() => supabase.auth.signOut()}
       />
+      {saveError && (
+        <div className="bg-warn-lt border-b border-warn/20 text-warn text-[12px] text-center py-2 px-4">
+          {saveError} — check your internet connection and try again.
+        </div>
+      )}
       {loading ? (
         <div className="flex items-center justify-center pt-20 text-muted text-sm">Loading entries…</div>
       ) : page === 'dashboard' ? (

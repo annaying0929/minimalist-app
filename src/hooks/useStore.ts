@@ -16,20 +16,25 @@ function toEntry(row: Row): Entry {
   }
 }
 
-export function useStore() {
+export function useStore(userId: string | undefined) {
   const [entries, setEntries] = useState<Entry[]>([])
   const [loading, setLoading] = useState(true)
+  const [saveError, setSaveError] = useState('')
 
   async function fetchEntries() {
-    const { data } = await supabase
+    if (!userId) return
+    const { data, error } = await supabase
       .from('entries')
       .select('*')
       .order('date', { ascending: false })
+    if (error) console.error('Fetch error:', error)
     if (data) setEntries(data.map(toEntry))
     setLoading(false)
   }
 
   useEffect(() => {
+    if (!userId) { setLoading(false); return }
+
     fetchEntries()
 
     const channel = supabase
@@ -38,31 +43,36 @@ export function useStore() {
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [])
+  }, [userId])
 
   async function addEntry(entry: Omit<Entry, 'id' | 'date'>) {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!userId) return
+    setSaveError('')
 
-    // Optimistic update so UI feels instant
     const optimistic: Entry = { ...entry, id: crypto.randomUUID(), date: new Date().toISOString() }
     setEntries(prev => [optimistic, ...prev])
 
-    await supabase.from('entries').insert({
+    const { error } = await supabase.from('entries').insert({
       type:            entry.type,
       category_id:     entry.categoryId,
       name:            entry.name,
       quantity:        entry.quantity,
       estimated_value: entry.estimatedValue,
-      user_id:         user.id,
+      user_id:         userId,
     })
+
+    if (error) {
+      console.error('Insert error:', error)
+      setSaveError(`Failed to save: ${error.message}`)
+      setEntries(prev => prev.filter(e => e.id !== optimistic.id))
+    }
   }
 
   async function deleteEntry(id: string) {
-    // Optimistic update
     setEntries(prev => prev.filter(e => e.id !== id))
-    await supabase.from('entries').delete().eq('id', id)
+    const { error } = await supabase.from('entries').delete().eq('id', id)
+    if (error) console.error('Delete error:', error)
   }
 
-  return { entries, loading, addEntry, deleteEntry }
+  return { entries, loading, saveError, addEntry, deleteEntry }
 }
