@@ -14,14 +14,18 @@ export function Auth() {
     setLoading(true)
     setError('')
 
-    const { error } = mode === 'signin'
-      ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password })
+    try {
+      const { error } = mode === 'signin'
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signUp({ email, password })
 
-    if (error) {
-      setError(error.message)
-    } else if (mode === 'signup') {
-      setDone(true)
+      if (error) {
+        setError(`${error.message} (${error.status ?? 'no status'})`)
+      } else if (mode === 'signup') {
+        setDone(true)
+      }
+    } catch (e: unknown) {
+      setError(`Network error: ${e instanceof Error ? e.message : String(e)}`)
     }
     setLoading(false)
   }
