@@ -1,33 +1,62 @@
-import { useState, useEffect } from 'react';
-import type { Entry, AppState } from '../types';
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
+import type { Entry } from '../types'
 
-const STORAGE_KEY = 'one-in-one-out-v1';
+type Row = Record<string, unknown>
 
-function load(): AppState {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as AppState;
-  } catch {
-    // ignore
+function toEntry(row: Row): Entry {
+  return {
+    id:             row.id as string,
+    type:           row.type as 'bought' | 'discarded',
+    categoryId:     row.category_id as string,
+    name:           row.name as string,
+    quantity:       row.quantity as number,
+    estimatedValue: row.estimated_value as number,
+    date:           row.date as string,
   }
-  return { entries: [] };
 }
 
 export function useStore() {
-  const [state, setState] = useState<AppState>(load);
+  const [entries, setEntries] = useState<Entry[]>([])
+  const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
-
-  function addEntry(entry: Omit<Entry, 'id' | 'date'>) {
-    const newEntry: Entry = {
-      ...entry,
-      id: crypto.randomUUID(),
-      date: new Date().toISOString(),
-    };
-    setState(prev => ({ entries: [newEntry, ...prev.entries] }));
+  async function fetchEntries() {
+    const { data } = await supabase
+      .from('entries')
+      .select('*')
+      .order('date', { ascending: false })
+    if (data) setEntries(data.map(toEntry))
+    setLoading(false)
   }
 
-  return { entries: state.entries, addEntry };
+  useEffect(() => {
+    fetchEntries()
+
+    const channel = supabase
+      .channel('entries-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'entries' }, fetchEntries)
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [])
+
+  async function addEntry(entry: Omit<Entry, 'id' | 'date'>) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    // Optimistic update so UI feels instant
+    const optimistic: Entry = { ...entry, id: crypto.randomUUID(), date: new Date().toISOString() }
+    setEntries(prev => [optimistic, ...prev])
+
+    await supabase.from('entries').insert({
+      type:            entry.type,
+      category_id:     entry.categoryId,
+      name:            entry.name,
+      quantity:        entry.quantity,
+      estimated_value: entry.estimatedValue,
+      user_id:         user.id,
+    })
+  }
+
+  return { entries, loading, addEntry }
 }
