@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>One In, One Out — Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #F7F6F3;
+      --surface:   #FFFFFF;
+      --border:    #E8E7E3;
+      --text:      #1C1C1A;
+      --muted:     #8A8A86;
+      --accent:    #4A6741;
+      --accent-lt: #EBF0EA;
+      --warn:      #C4704F;
+      --warn-lt:   #FAF0EB;
+      --radius:    12px;
+      --shadow:    0 1px 4px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo { font-weight: 600; font-size: 15px; letter-spacing: -.3px; }
+    .logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-links button {
+      background: none; border: none; cursor: pointer;
+      padding: 6px 12px; border-radius: 8px;
+      font-size: 13px; color: var(--muted); font-family: inherit;
+      transition: all .15s;
+    }
+    .nav-links button.active, .nav-links button:hover {
+      background: var(--bg); color: var(--text); font-weight: 500;
+    }
+    .btn-primary {
+      background: var(--accent); color: white;
+      border: none; border-radius: 8px;
+      padding: 8px 16px; font-size: 13px; font-weight: 500;
+      cursor: pointer; font-family: inherit; transition: opacity .15s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-primary:hover { opacity: .88; }
+
+    /* ── LAYOUT ── */
+    main { max-width: 960px; margin: 0 auto; padding: 28px 24px 60px; }
+
+    /* ── SUMMARY STRIP ── */
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+    }
+    .stat-card .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
+    .stat-card .value { font-size: 22px; font-weight: 600; letter-spacing: -.5px; }
+    .stat-card .value.warn { color: var(--warn); }
+    .stat-card .value.ok   { color: var(--accent); }
+    .stat-card .sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .section-header h2 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); }
+
+    /* ── CATEGORY GRID ── */
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .cat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform .12s, box-shadow .12s;
+    }
+    .cat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,.09); }
+    .cat-card.has-debt { border-left: 3px solid var(--warn); }
+    .cat-card.clear    { border-left: 3px solid var(--accent); }
+
+    .cat-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+    .cat-icon { font-size: 20px; line-height: 1; }
+    .cat-badge {
+      font-size: 10px; font-weight: 600; padding: 3px 8px;
+      border-radius: 20px; letter-spacing: .3px;
+    }
+    .cat-badge.debt { background: var(--warn-lt); color: var(--warn); }
+    .cat-badge.ok   { background: var(--accent-lt); color: var(--accent); }
+
+    .cat-name { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+    .cat-meta { font-size: 11px; color: var(--muted); }
+    .cat-bar { margin-top: 10px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .cat-bar-fill { height: 100%; border-radius: 2px; }
+    .cat-bar-fill.debt { background: var(--warn); }
+    .cat-bar-fill.ok   { background: var(--accent); }
+
+    /* ── ACTIVITY FEED ── */
+    .activity-feed {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .feed-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; flex-shrink: 0; margin-top: 1px;
+    }
+    .feed-dot.buy     { background: var(--warn-lt); }
+    .feed-dot.discard { background: var(--accent-lt); }
+    .feed-body { flex: 1; }
+    .feed-title { font-size: 13px; font-weight: 500; }
+    .feed-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .feed-right { text-align: right; flex-shrink: 0; }
+    .feed-amount { font-size: 13px; font-weight: 500; }
+    .feed-amount.buy     { color: var(--warn); }
+    .feed-amount.discard { color: var(--accent); }
+    .feed-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.35); z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface); border-radius: 16px;
+      padding: 28px; width: 100%; max-width: 440px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.18);
+      animation: slideUp .2s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(12px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+
+    .modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+    .toggle-row {
+      display: grid; grid-template-columns: 1fr 1fr;
+      background: var(--bg); border-radius: 8px; padding: 3px;
+      margin-bottom: 20px;
+    }
+    .toggle-btn {
+      border: none; background: none; border-radius: 6px;
+      padding: 8px; font-size: 13px; font-weight: 500;
+      cursor: pointer; font-family: inherit; color: var(--muted);
+      transition: all .15s;
+    }
+    .toggle-btn.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+
+    .form-field { margin-bottom: 14px; }
+    .form-field label { display: block; font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+    .form-field input, .form-field select {
+      width: 100%; padding: 10px 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-family: inherit; background: var(--bg);
+      color: var(--text); outline: none; transition: border .15s;
+    }
+    .form-field input:focus, .form-field select:focus { border-color: var(--accent); background: white; }
+
+    .debt-notice {
+      background: var(--warn-lt); border: 1px solid #F0C4AE;
+      border-radius: 8px; padding: 12px 14px; margin-bottom: 16px;
+      font-size: 12px; color: var(--warn); line-height: 1.5;
+    }
+    .debt-notice strong { font-weight: 600; }
+
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .btn-ghost {
+      background: none; border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 16px; font-size: 13px; cursor: pointer; font-family: inherit;
+      color: var(--muted); transition: all .15s;
+    }
+    .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+
+    /* ── PAGE TABS ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── HISTORY PAGE ── */
+    .history-filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-chip {
+      padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border);
+      background: var(--surface); font-size: 12px; cursor: pointer;
+      font-family: inherit; transition: all .15s; color: var(--muted);
+    }
+    .filter-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    .history-table {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
+    }
+    .history-row {
+      display: grid;
+      grid-template-columns: 32px 1fr 100px 80px 70px 80px;
+      align-items: center; gap: 12px;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .history-row.header { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .5px; background: var(--bg); }
+    .history-row:last-child { border-bottom: none; }
+    .type-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .type-dot.buy { background: var(--warn); }
+    .type-dot.discard { background: var(--accent); }
+    .linked { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .tag { font-size: 10px; padding: 2px 8px; border-radius: 12px; display: inline-block; }
+    .tag.buy { background: var(--warn-lt); color: var(--warn); }
+    .tag.discard { background: var(--accent-lt); color: var(--accent); }
+
+    @media (max-width: 640px) {
+      .summary-strip { grid-template-columns: repeat(2, 1fr); }
+      .category-grid { grid-template-columns: repeat(2, 1fr); }
+      .history-row { grid-template-columns: 32px 1fr 60px 60px; }
+      .history-row .col-linked, .history-row .col-date { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">one<span>in</span>oneout</div>
+  <div class="nav-links">
+    <button class="active" onclick="showPage('dashboard', this)">Dashboard</button>
+    <button onclick="showPage('history', this)">History</button>
+  </div>
+  <button class="btn-primary" onclick="openModal()">+ Log entry</button>
+</nav>
+
+<!-- DASHBOARD PAGE -->
+<main>
+<div id="page-dashboard" class="page active">
+
+  <!-- Summary strip -->
+  <div class="summary-strip">
+    <div class="stat-card">
+      <div class="label">Items to discard</div>
+      <div class="value warn">5</div>
+      <div class="sub">across 3 categories</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Bought this month</div>
+      <div class="value">12</div>
+      <div class="sub">£ 684 estimated</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Discarded this month</div>
+      <div class="value ok">7</div>
+      <div class="sub">£ 310 estimated value</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Net cost awareness</div>
+      <div class="value">£ 374</div>
+      <div class="sub">spent beyond discarded</div>
+    </div>
+  </div>
+
+  <!-- Categories -->
+  <div class="section-header">
+    <h2>Categories</h2>
+  </div>
+  <div class="category-grid">
+
+    <div class="cat-card has-debt" onclick="openModal('Clothing — Adults')">
+      <div class="cat-top">
+        <div class="cat-icon">👗</div>
+        <div class="cat-badge debt">2 to discard</div>
+      </div>
+      <div class="cat-name">Clothing — Adults</div>
+      <div class="cat-meta">4 bought · 2 discarded · £ 145 spent</div>
+      <div class="cat-bar"><div class="cat-bar-fill debt" style="width:50%"></div></div>
+    </div>
+
+    <div class="cat-card has-debt" onclick="openModal('Baby & Kids Clothing')">
+      <div class="cat-top">
+        <div class="cat-icon">🧸</div>
+        <div class="cat-badge debt">3 to discard</div>
+      </div>
+      <div class="cat-name">Baby & Kids Clothing</div>
+      <div class="cat-meta">3 bought · 0 discarded · £ 89 spent</div>
+      <div class="cat-bar"><div class="cat-bar-fill debt" style="width:20%"></div></div>
+    </div>
+
+    <div class="cat-card clear">
+      <div class="cat-top">
+        <div class="cat-icon">👟</div>
+        <div class="cat-badge ok">Clear</div>
+      </div>
+      <div class="cat-name">Shoes & Accessories</div>
+      <div class="cat-meta">2 bought · 2 discarded · £ 120 spent</div>
+      <div class="cat-bar"><div class="cat-bar-fill ok" style="width:100%"></div></div>
+    </div>
+
+    <div class="cat-card clear">
+      <div class="cat-top">
+        <div class="cat-icon">📚</div>
+        <div class="cat-badge ok">Clear</div>
+      </div>
+      <div class="cat-name">Books</div>
+      <div class="cat-meta">3 bought · 3 discarded · £ 45 spent</div>
+      <div class="cat-bar"><div class="cat-bar-fill ok" style="width:100%"></div></div>
+    </div>
+
+    <div class="cat-card has-debt" onclick="openModal('Electronics & Gadgets')">
+      <div class="cat-top">
+        <div class="cat-icon">📱</div>
+        <div class="cat-badge debt">1 to discard</div>
+      </div>
+      <div class="cat-name">Electronics & Gadgets</div>
+      <div class="cat-meta">2 bought · 1 discarded · £ 185 spent</div>
+      <div class="cat-bar"><div class="cat-bar-fill debt" style="width:50%"></div></div>
+    </div>
+
+    <div class="cat-card clear">
+      <div class="cat-top">
+        <div class="cat-icon">🍳</div>
+        <div class="cat-badge ok">Clear</div>
+      </div>
+      <div class="cat-name">Kitchen & Cookware</div>
+      <div class="cat-meta">1 bought · 1 discarded · £ 35 spent</div>
+      <div class="cat-bar"><div class="cat-bar-fill ok" style="width:100%"></div></div>
+    </div>
+
+    <div class="cat-card clear">
+      <div class="cat-top">
+        <div class="cat-icon">🛋️</div>
+        <div class="cat-badge ok">Clear</div>
+      </div>
+      <div class="cat-name">Furniture</div>
+      <div class="cat-meta">0 bought · 0 discarded · £ 0 spent</div>
+      <div class="cat-bar"><div class="cat-bar-fill ok" style="width:0%"></div></div>
+    </div>
+
+    <div class="cat-card clear">
+      <div class="cat-top">
+        <div class="cat-icon">🕯️</div>
+        <div class="cat-badge ok">Clear</div>
+      </div>
+      <div class="cat-name">Decorations & Art</div>
+      <div class="cat-meta">1 bought · 1 discarded · £ 25 spent</div>
+      <div class="cat-bar"><div class="cat-bar-fill ok" style="width:100%"></div></div>
+    </div>
+
+    <div class="cat-card clear">
+      <div class="cat-top">
+        <div class="cat-icon">🧩</div>
+        <div class="cat-badge ok">Clear</div>
+      </div>
+      <div class="cat-name">Toys & Play</div>
+      <div class="cat-meta">2 bought · 2 discarded · £ 40 spent</div>
+      <div class="cat-bar"><div class="cat-bar-fill ok" style="width:100%"></div></div>
+    </div>
+
+    <div class="cat-card clear">
+      <div class="cat-top">
+        <div class="cat-icon">🛼</div>
+        <div class="cat-badge ok">Clear</div>
+      </div>
+      <div class="cat-name">Baby Gear</div>
+      <div class="cat-meta">0 bought · 0 discarded · £ 0 spent</div>
+      <div class="cat-bar"><div class="cat-bar-fill ok" style="width:0%"></div></div>
+    </div>
+
+    <div class="cat-card clear">
+      <div class="cat-top">
+        <div class="cat-icon">🎲</div>
+        <div class="cat-badge ok">Clear</div>
+      </div>
+      <div class="cat-name">Games & Puzzles</div>
+      <div class="cat-meta">0 bought · 0 discarded · £ 0 spent</div>
+      <div class="cat-bar"><div class="cat-bar-fill ok" style="width:0%"></div></div>
+    </div>
+
+    <div class="cat-card clear">
+      <div class="cat-top">
+        <div class="cat-icon">🏃</div>
+        <div class="cat-badge ok">Clear</div>
+      </div>
+      <div class="cat-name">Sports & Fitness</div>
+      <div class="cat-meta">0 bought · 0 discarded · £ 0 spent</div>
+      <div class="cat-bar"><div class="cat-bar-fill ok" style="width:0%"></div></div>
+    </div>
+
+    <div class="cat-card clear">
+      <div class="cat-top">
+        <div class="cat-icon">🛏️</div>
+        <div class="cat-badge ok">Clear</div>
+      </div>
+      <div class="cat-name">Bedding & Textiles</div>
+      <div class="cat-meta">0 bought · 0 discarded · £ 0 spent</div>
+      <div class="cat-bar"><div class="cat-bar-fill ok" style="width:0%"></div></div>
+    </div>
+
+    <div class="cat-card clear">
+      <div class="cat-top">
+        <div class="cat-icon">💻</div>
+        <div class="cat-badge ok">Clear</div>
+      </div>
+      <div class="cat-name">Stationery & Office</div>
+      <div class="cat-meta">0 bought · 0 discarded · £ 0 spent</div>
+      <div class="cat-bar"><div class="cat-bar-fill ok" style="width:0%"></div></div>
+    </div>
+
+    <div class="cat-card clear">
+      <div class="cat-top">
+        <div class="cat-icon">💄</div>
+        <div class="cat-badge ok">Clear</div>
+      </div>
+      <div class="cat-name">Personal Care & Beauty</div>
+      <div class="cat-meta">0 bought · 0 discarded · £ 0 spent</div>
+      <div class="cat-bar"><div class="cat-bar-fill ok" style="width:0%"></div></div>
+    </div>
+
+  </div>
+
+  <!-- Recent activity -->
+  <div class="section-header">
+    <h2>Recent activity</h2>
+  </div>
+  <div class="activity-feed">
+    <div class="feed-item">
+      <div class="feed-dot buy">🛍️</div>
+      <div class="feed-body">
+        <div class="feed-title">Winter coat — Navy</div>
+        <div class="feed-sub">Clothing — Adults · still needs 1 discard</div>
+      </div>
+      <div class="feed-right">
+        <div class="feed-amount buy">+ £ 85</div>
+        <div class="feed-date">Today</div>
+      </div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-dot buy">🛍️</div>
+      <div class="feed-body">
+        <div class="feed-title">3× Baby grows (6–9m)</div>
+        <div class="feed-sub">Baby & Kids Clothing · still needs 3 discards</div>
+      </div>
+      <div class="feed-right">
+        <div class="feed-amount buy">+ £ 36</div>
+        <div class="feed-date">Today</div>
+      </div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-dot discard">♻️</div>
+      <div class="feed-body">
+        <div class="feed-title">Old running shoes</div>
+        <div class="feed-sub">Shoes & Accessories · clears debt from Nike trainers</div>
+      </div>
+      <div class="feed-right">
+        <div class="feed-amount discard">− £ 20</div>
+        <div class="feed-date">Yesterday</div>
+      </div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-dot buy">🛍️</div>
+      <div class="feed-body">
+        <div class="feed-title">Wireless headphones</div>
+        <div class="feed-sub">Electronics & Gadgets · still needs 1 discard</div>
+      </div>
+      <div class="feed-right">
+        <div class="feed-amount buy">+ £ 95</div>
+        <div class="feed-date">24 Apr</div>
+      </div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-dot discard">♻️</div>
+      <div class="feed-body">
+        <div class="feed-title">Old blazer</div>
+        <div class="feed-sub">Clothing — Adults · clears debt from linen shirt</div>
+      </div>
+      <div class="feed-right">
+        <div class="feed-amount discard">− £ 30</div>
+        <div class="feed-date">22 Apr</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /dashboard -->
+
+<!-- HISTORY PAGE -->
+<div id="page-history" class="page">
+  <div class="history-filters">
+    <button class="filter-chip active">All</button>
+    <button class="filter-chip">Bought</button>
+    <button class="filter-chip">Discarded</button>
+    <button class="filter-chip">Clothing</button>
+    <button class="filter-chip">Baby & Kids</button>
+    <button class="filter-chip">Electronics</button>
+    <button class="filter-chip">Books</button>
+  </div>
+  <div class="history-table">
+    <div class="history-row header">
+      <div></div>
+      <div>Item</div>
+      <div>Category</div>
+      <div>Type</div>
+      <div>Value</div>
+      <div class="col-date">Date</div>
+    </div>
+    <div class="history-row">
+      <div class="type-dot buy"></div>
+      <div>
+        <div>Winter coat — Navy</div>
+        <div class="linked">↳ 1 discard still pending</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">Clothing Adults</div>
+      <div><span class="tag buy">Bought</span></div>
+      <div style="color:var(--warn);font-weight:500">£ 85</div>
+      <div class="col-date" style="color:var(--muted);font-size:12px">26 Apr</div>
+    </div>
+    <div class="history-row">
+      <div class="type-dot buy"></div>
+      <div>
+        <div>Baby grows 6–9m ×3</div>
+        <div class="linked">↳ 3 discards still pending</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">Baby Clothing</div>
+      <div><span class="tag buy">Bought</span></div>
+      <div style="color:var(--warn);font-weight:500">£ 36</div>
+      <div class="col-date" style="color:var(--muted);font-size:12px">26 Apr</div>
+    </div>
+    <div class="history-row">
+      <div class="type-dot discard"></div>
+      <div>
+        <div>Old running shoes</div>
+        <div class="linked">↳ clears Nike trainers debt</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">Shoes</div>
+      <div><span class="tag discard">Discarded</span></div>
+      <div style="color:var(--accent);font-weight:500">£ 20</div>
+      <div class="col-date" style="color:var(--muted);font-size:12px">25 Apr</div>
+    </div>
+    <div class="history-row">
+      <div class="type-dot buy"></div>
+      <div>
+        <div>Wireless headphones</div>
+        <div class="linked">↳ 1 discard still pending</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">Electronics</div>
+      <div><span class="tag buy">Bought</span></div>
+      <div style="color:var(--warn);font-weight:500">£ 95</div>
+      <div class="col-date" style="color:var(--muted);font-size:12px">24 Apr</div>
+    </div>
+    <div class="history-row">
+      <div class="type-dot discard"></div>
+      <div>
+        <div>Old blazer</div>
+        <div class="linked">↳ clears linen shirt debt</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">Clothing Adults</div>
+      <div><span class="tag discard">Discarded</span></div>
+      <div style="color:var(--accent);font-weight:500">£ 30</div>
+      <div class="col-date" style="color:var(--muted);font-size:12px">22 Apr</div>
+    </div>
+    <div class="history-row">
+      <div class="type-dot discard"></div>
+      <div>
+        <div>The Alchemist</div>
+        <div class="linked">↳ clears Atomic Habits debt</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">Books</div>
+      <div><span class="tag discard">Discarded</span></div>
+      <div style="color:var(--accent);font-weight:500">£ 8</div>
+      <div class="col-date" style="color:var(--muted);font-size:12px">20 Apr</div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- LOG ENTRY MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <h3>Log an entry</h3>
+    <div class="toggle-row">
+      <button class="toggle-btn active" id="btn-buy" onclick="switchType('buy')">🛍️ &nbsp;Bought</button>
+      <button class="toggle-btn" id="btn-discard" onclick="switchType('discard')">♻️ &nbsp;Discarded</button>
+    </div>
+    <div id="debt-notice" class="debt-notice">
+      <strong>Clothing — Adults</strong> has 1 pending discard.<br>
+      After this purchase you'll need to discard <strong>2 items</strong> from this category.
+    </div>
+    <div class="form-field">
+      <label>Item name</label>
+      <input type="text" placeholder="e.g. Winter coat, Baby grows ×3…" />
+    </div>
+    <div class="form-field">
+      <label>Category</label>
+      <select id="modal-category" onchange="updateNotice()">
+        <option>Clothing — Adults</option>
+        <option>Baby & Kids Clothing</option>
+        <option>Shoes & Accessories</option>
+        <option>Books</option>
+        <option>Electronics & Gadgets</option>
+        <option>Kitchen & Cookware</option>
+        <option>Furniture</option>
+        <option>Decorations & Art</option>
+        <option>Toys & Play</option>
+        <option>Baby Gear</option>
+        <option>Games & Puzzles</option>
+        <option>Sports & Fitness</option>
+        <option>Bedding & Textiles</option>
+        <option>Stationery & Office</option>
+        <option>Personal Care & Beauty</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Quantity</label>
+      <input type="number" value="1" min="1" />
+    </div>
+    <div class="form-field">
+      <label>Estimated value (£)</label>
+      <input type="number" placeholder="0.00" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="closeModal()">Save entry</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showPage(id, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function openModal(category) {
+    if (category) {
+      document.getElementById('modal-category').value = category;
+    }
+    document.getElementById('modal').classList.add('open');
+    updateNotice();
+  }
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+  }
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('modal')) closeModal();
+  }
+
+  let currentType = 'buy';
+  function switchType(type) {
+    currentType = type;
+    document.getElementById('btn-buy').classList.toggle('active', type === 'buy');
+    document.getElementById('btn-discard').classList.toggle('active', type === 'discard');
+    updateNotice();
+  }
+
+  const debts = {
+    'Clothing — Adults': 1,
+    'Baby & Kids Clothing': 3,
+    'Electronics & Gadgets': 1,
+  };
+
+  function updateNotice() {
+    const notice = document.getElementById('debt-notice');
+    const cat = document.getElementById('modal-category').value;
+    const d = debts[cat] || 0;
+    if (currentType === 'buy') {
+      notice.style.display = 'block';
+      if (d > 0) {
+        notice.innerHTML = `<strong>${cat}</strong> already has ${d} pending discard${d>1?'s':''}.<br>After this purchase you'll owe <strong>${d+1} items</strong> to discard.`;
+      } else {
+        notice.innerHTML = `<strong>${cat}</strong> is currently clear. This purchase will require <strong>1 discard</strong> from this category.`;
+        notice.style.background = 'var(--accent-lt)';
+        notice.style.borderColor = '#B0CCAE';
+        notice.style.color = 'var(--accent)';
+        return;
+      }
+      notice.style.background = 'var(--warn-lt)';
+      notice.style.borderColor = '#F0C4AE';
+      notice.style.color = 'var(--warn)';
+    } else {
+      notice.style.display = d > 0 ? 'block' : 'none';
+      if (d > 0) {
+        notice.innerHTML = `Discarding this will reduce <strong>${cat}</strong> debt to ${d-1} item${d-1!==1?'s':''}.`;
+        notice.style.background = 'var(--accent-lt)';
+        notice.style.borderColor = '#B0CCAE';
+        notice.style.color = 'var(--accent)';
+      }
+    }
+  }
+
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
