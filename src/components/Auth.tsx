@@ -14,6 +14,13 @@ export function Auth() {
     setLoading(true)
     setError('')
 
+    const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
+    if (!url || url.includes('placeholder')) {
+      setError('Env vars not loaded — VITE_SUPABASE_URL is missing. Check Vercel environment variables.')
+      setLoading(false)
+      return
+    }
+
     try {
       const { error } = mode === 'signin'
         ? await supabase.auth.signInWithPassword({ email, password })
@@ -25,7 +32,7 @@ export function Auth() {
         setDone(true)
       }
     } catch (e: unknown) {
-      setError(`Network error: ${e instanceof Error ? e.message : String(e)}`)
+      setError(`Network error: ${e instanceof Error ? e.message : String(e)} — URL: ${url?.slice(0, 40)}`)
     }
     setLoading(false)
   }
