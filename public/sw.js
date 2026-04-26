@@ -1,4 +1,4 @@
-const CACHE = 'oioo-v1';
+const CACHE = 'oioo-v2';
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.add('/')));
@@ -15,6 +15,7 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // Always fetch fresh for navigation — never serve stale HTML
   if (e.request.mode === 'navigate') {
     e.respondWith(fetch(e.request).catch(() => caches.match('/')));
     return;
