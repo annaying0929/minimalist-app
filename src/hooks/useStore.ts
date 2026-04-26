@@ -58,5 +58,11 @@ export function useStore() {
     })
   }
 
-  return { entries, loading, addEntry }
+  async function deleteEntry(id: string) {
+    // Optimistic update
+    setEntries(prev => prev.filter(e => e.id !== id))
+    await supabase.from('entries').delete().eq('id', id)
+  }
+
+  return { entries, loading, addEntry, deleteEntry }
 }

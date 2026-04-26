@@ -17,7 +17,7 @@ export default function App() {
   const [page, setPage] = useState<Page>('dashboard')
   const [modalOpen, setModalOpen] = useState(false)
   const [modalCategoryId, setModalCategoryId] = useState<string | undefined>()
-  const { entries, loading, addEntry } = useStore()
+  const { entries, loading, addEntry, deleteEntry } = useStore()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
@@ -66,9 +66,9 @@ export default function App() {
       {loading ? (
         <div className="flex items-center justify-center pt-20 text-muted text-sm">Loading entries…</div>
       ) : page === 'dashboard' ? (
-        <Dashboard entries={entries} onLogEntry={openModal} />
+        <Dashboard entries={entries} onLogEntry={openModal} onDelete={deleteEntry} />
       ) : (
-        <History entries={entries} />
+        <History entries={entries} onDelete={deleteEntry} />
       )}
       <LogModal
         open={modalOpen}

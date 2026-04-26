@@ -2,11 +2,15 @@ import { useState, useMemo } from 'react';
 import type { Entry } from '../types';
 import { CATEGORIES } from '../data/categories';
 
-interface Props { entries: Entry[] }
+interface Props {
+  entries: Entry[]
+  onDelete: (id: string) => void
+}
 
-export function History({ entries }: Props) {
+export function History({ entries, onDelete }: Props) {
   const [typeFilter, setTypeFilter] = useState<'all' | 'bought' | 'discarded'>('all');
   const [catFilter, setCatFilter] = useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const usedCatIds = useMemo(() => [...new Set(entries.map(e => e.categoryId))], [entries]);
 
@@ -22,9 +26,17 @@ export function History({ entries }: Props) {
     return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
+  function handleDelete(id: string) {
+    if (confirmId === id) {
+      onDelete(id)
+      setConfirmId(null)
+    } else {
+      setConfirmId(id)
+    }
+  }
+
   return (
     <main className="max-w-4xl mx-auto px-6 py-7 pb-16">
-      {/* Filters */}
       <div className="flex flex-wrap gap-2 mb-5">
         {(['all', 'bought', 'discarded'] as const).map(f => (
           <button
@@ -67,22 +79,23 @@ export function History({ entries }: Props) {
         </div>
       ) : (
         <div className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
-          {/* Header row */}
-          <div className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-5 py-2.5 bg-bg border-b border-border text-[11px] font-medium text-muted uppercase tracking-wide">
+          <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 px-5 py-2.5 bg-bg border-b border-border text-[11px] font-medium text-muted uppercase tracking-wide">
             <div></div>
             <div>Item</div>
             <div>Value</div>
             <div className="hidden sm:block">Date</div>
+            <div></div>
           </div>
           {filtered.map((entry, i) => {
             const cat = CATEGORIES.find(c => c.id === entry.categoryId);
             const isBought = entry.type === 'bought';
+            const confirming = confirmId === entry.id;
             return (
               <div
                 key={entry.id}
-                className={`grid grid-cols-[auto_1fr_auto_auto] gap-4 items-center px-5 py-3 ${
+                className={`grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 items-center px-5 py-3 ${
                   i < filtered.length - 1 ? 'border-b border-border' : ''
-                }`}
+                } ${confirming ? 'bg-red-50' : ''}`}
               >
                 <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isBought ? 'bg-warn' : 'bg-accent'}`} />
                 <div className="min-w-0">
@@ -101,6 +114,17 @@ export function History({ entries }: Props) {
                   {isBought ? '+' : '−'} £ {entry.estimatedValue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </div>
                 <div className="hidden sm:block text-[12px] text-muted whitespace-nowrap">{formatDate(entry.date)}</div>
+                <button
+                  onClick={() => handleDelete(entry.id)}
+                  onBlur={() => setConfirmId(null)}
+                  className={`text-[11px] font-medium px-2 py-1 rounded-lg transition-colors whitespace-nowrap ${
+                    confirming
+                      ? 'text-red-600 bg-red-100 hover:bg-red-200'
+                      : 'text-muted hover:text-red-500 hover:bg-red-50'
+                  }`}
+                >
+                  {confirming ? 'Confirm?' : '✕'}
+                </button>
               </div>
             );
           })}
