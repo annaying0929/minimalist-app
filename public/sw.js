@@ -1,4 +1,4 @@
-const CACHE = 'oioo-v2';
+const CACHE = 'oioo-v3';
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.add('/')));
@@ -15,11 +15,15 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Always fetch fresh for navigation — never serve stale HTML
+  // Only handle requests to our own origin — never intercept Supabase or other external API calls
+  if (!e.request.url.startsWith(self.location.origin)) return;
+
+  // Always fetch fresh HTML so the app never shows a stale version
   if (e.request.mode === 'navigate') {
     e.respondWith(fetch(e.request).catch(() => caches.match('/')));
     return;
   }
+
   e.respondWith(
     caches.match(e.request).then(cached => cached ||
       fetch(e.request).then(res => {
