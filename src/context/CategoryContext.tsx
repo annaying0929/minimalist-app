@@ -5,13 +5,15 @@ import { CATEGORIES } from '../data/categories'
 interface CategoryStore {
   overrides: Record<string, { name: string; icon: string }>
   custom: Category[]
+  hidden: string[]
 }
 
 function load(): CategoryStore {
   try {
-    return JSON.parse(localStorage.getItem('category-store') ?? 'null') ?? { overrides: {}, custom: [] }
+    const s = JSON.parse(localStorage.getItem('category-store') ?? 'null') ?? {}
+    return { overrides: {}, custom: [], hidden: [], ...s }
   } catch {
-    return { overrides: {}, custom: [] }
+    return { overrides: {}, custom: [], hidden: [] }
   }
 }
 
@@ -32,9 +34,10 @@ const CategoryContext = createContext<ContextValue | null>(null)
 export function CategoryProvider({ children }: { children: React.ReactNode }) {
   const [store, setStore] = useState<CategoryStore>(load)
 
+  const hiddenSet = new Set(store.hidden)
   const categories: Category[] = [
-    ...CATEGORIES.map(c => ({ ...c, ...(store.overrides[c.id] ?? {}) })),
-    ...store.custom,
+    ...CATEGORIES.filter(c => !hiddenSet.has(c.id)).map(c => ({ ...c, ...(store.overrides[c.id] ?? {}) })),
+    ...store.custom.filter(c => !hiddenSet.has(c.id)),
   ]
 
   const builtinIds = new Set(CATEGORIES.map(c => c.id))
@@ -57,7 +60,11 @@ export function CategoryProvider({ children }: { children: React.ReactNode }) {
         return id
       },
       deleteCategory(id) {
-        update({ ...store, custom: store.custom.filter(c => c.id !== id) })
+        update({
+          ...store,
+          custom: store.custom.filter(c => c.id !== id),
+          hidden: store.hidden.includes(id) ? store.hidden : [...store.hidden, id],
+        })
       },
     }}>
       {children}

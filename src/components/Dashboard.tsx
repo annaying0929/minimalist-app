@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import type { Category, Entry } from '../types';
+import { useCategories } from '../context/CategoryContext';
 import { StatStrip } from './StatStrip';
 import { CategoryCard } from './CategoryCard';
 import { ActivityFeed } from './ActivityFeed';
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function Dashboard({ entries, categories, onLogEntry, onDelete, onEdit }: Props) {
+  const { deleteCategory } = useCategories();
   const [addCatOpen, setAddCatOpen] = useState(false);
 
   const sortedCategories = useMemo(() => {
@@ -40,6 +42,7 @@ export function Dashboard({ entries, categories, onLogEntry, onDelete, onEdit }:
             category={cat}
             entries={entries}
             onLogEntry={() => onLogEntry(cat.id)}
+            onDelete={deleteCategory}
           />
         ))}
         <button
