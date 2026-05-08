@@ -20,7 +20,7 @@ export default function App() {
   const [modalCategoryId, setModalCategoryId] = useState<string | undefined>()
   const [editEntry, setEditEntry] = useState<Entry | undefined>()
   const { entries, loading, saveError, addEntry, updateEntry, deleteEntry } = useStore(session?.user.id)
-  const { categories } = useCategories()
+  const { categories, deleteCategory } = useCategories()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
@@ -92,6 +92,7 @@ export default function App() {
         onClose={() => setModalOpen(false)}
         onSave={handleSave}
         onUpdate={(id, fields) => updateEntry(id, fields)}
+        onDeleteCategory={deleteCategory}
         debtMap={debtMap}
       />
     </div>

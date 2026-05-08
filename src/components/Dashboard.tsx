@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import type { Category, Entry } from '../types';
 import { StatStrip } from './StatStrip';
 import { CategoryCard } from './CategoryCard';
-import { CategoryModal } from './CategoryModal';
 import { ActivityFeed } from './ActivityFeed';
 import { AddCategoryModal } from './AddCategoryModal';
 
@@ -16,7 +15,6 @@ interface Props {
 
 export function Dashboard({ entries, categories, onLogEntry, onDelete, onEdit }: Props) {
   const [addCatOpen, setAddCatOpen] = useState(false);
-  const [selectedCat, setSelectedCat] = useState<Category | null>(null);
 
   const sortedCategories = useMemo(() => {
     const discardCount: Record<string, number> = {};
@@ -41,7 +39,7 @@ export function Dashboard({ entries, categories, onLogEntry, onDelete, onEdit }:
             key={cat.id}
             category={cat}
             entries={entries}
-            onLogEntry={() => setSelectedCat(cat)}
+            onLogEntry={() => onLogEntry(cat.id)}
           />
         ))}
         <button
@@ -58,12 +56,6 @@ export function Dashboard({ entries, categories, onLogEntry, onDelete, onEdit }:
       </div>
       <ActivityFeed entries={entries} onDelete={onDelete} onEdit={onEdit} />
 
-      <CategoryModal
-        category={selectedCat}
-        entries={entries}
-        onClose={() => setSelectedCat(null)}
-        onLogEntry={id => { setSelectedCat(null); onLogEntry(id); }}
-      />
       <AddCategoryModal open={addCatOpen} onClose={() => setAddCatOpen(false)} />
     </main>
   );

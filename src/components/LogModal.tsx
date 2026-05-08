@@ -9,19 +9,22 @@ interface Props {
   onClose: () => void;
   onSave: (entry: { type: EntryType; categoryId: string; name: string; quantity: number; estimatedValue: number }) => void;
   onUpdate?: (id: string, fields: { type: EntryType; categoryId: string; name: string; quantity: number; estimatedValue: number }) => void;
+  onDeleteCategory?: (id: string) => void;
   debtMap: Record<string, number>;
 }
 
-export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, onUpdate, debtMap }: Props) {
+export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, onUpdate, onDeleteCategory, debtMap }: Props) {
   const { categories } = useCategories();
   const [type, setType] = useState<EntryType>('bought');
   const [categoryName, setCategoryName] = useState('');
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [value, setValue] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     if (open) {
+      setConfirmDelete(false);
       if (editEntry) {
         setType(editEntry.type);
         const cat = categories.find(c => c.id === editEntry.categoryId);
@@ -45,10 +48,11 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
   const debt = debtMap[resolvedId] ?? 0;
   const qty = Math.max(1, parseInt(quantity) || 1);
 
+  const showDeleteBtn = !!initialCategoryId && !editEntry && !!onDeleteCategory;
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !matchedCat) return;
-
     const fields = { type, categoryId: matchedCat.id, name: name.trim(), quantity: Math.max(1, parseInt(quantity) || 1), estimatedValue: parseFloat(value) || 0 };
     if (editEntry && onUpdate) {
       onUpdate(editEntry.id, fields);
@@ -85,7 +89,40 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="bg-surface rounded-2xl p-7 w-full max-w-md shadow-2xl animate-[slideUp_0.18s_ease]">
-        <h3 className="text-base font-semibold mb-5">{editEntry ? 'Edit entry' : 'Log an entry'}</h3>
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-base font-semibold">{editEntry ? 'Edit entry' : 'Log an entry'}</h3>
+          {showDeleteBtn && (
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(c => !c)}
+              className={`text-[13px] font-medium px-2 py-1 rounded-lg transition-colors ${
+                confirmDelete ? 'text-red-600 bg-red-100' : 'text-muted hover:text-red-500 hover:bg-red-50'
+              }`}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Delete confirmation */}
+        {confirmDelete && (
+          <div className="flex items-center gap-2 mb-4 px-3 py-2.5 bg-red-50 border border-red-200 rounded-lg">
+            <span className="text-[12px] text-red-700 flex-1">Delete this category?</span>
+            <button
+              type="button"
+              onClick={() => { onDeleteCategory!(initialCategoryId!); onClose(); }}
+              className="text-[12px] font-semibold text-red-600 hover:text-red-700"
+            >Delete</button>
+            <span className="text-border">·</span>
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(false)}
+              className="text-[12px] text-muted hover:text-[#1C1C1A]"
+            >Cancel</button>
+          </div>
+        )}
 
         {/* Toggle */}
         <div className="grid grid-cols-2 bg-bg rounded-lg p-0.5 mb-5">
