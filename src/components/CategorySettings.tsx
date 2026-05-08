@@ -3,17 +3,87 @@ import { useCategories } from '../context/CategoryContext'
 import { IconPicker } from './IconPicker'
 
 
-const BG_COLORS = [
-  { name: 'Warm White',    value: '#F7F6F3' },
-  { name: 'Dusty Pink',    value: '#FAF0F0' },
-  { name: 'Powder Blue',   value: '#EDF4FB' },
-  { name: 'Soft Lavender', value: '#F2EEF8' },
-  { name: 'Sage Mist',     value: '#EEF4EE' },
-  { name: 'Peach Cream',   value: '#FBF2E9' },
-  { name: 'Mint',          value: '#EBF6F1' },
-  { name: 'Butter',        value: '#F9F5E4' },
-  { name: 'Blush',         value: '#F8EEED' },
-  { name: 'Lilac Mist',    value: '#F0EDF8' },
+const BG_COLOR_GROUPS = [
+  {
+    label: 'Neutral',
+    colors: [
+      { name: 'Warm White',  value: '#F7F6F3' },
+      { name: 'Warm Sand',   value: '#EDE9E0' },
+      { name: 'Warm Stone',  value: '#E0DDD5' },
+    ],
+  },
+  {
+    label: 'Pink',
+    colors: [
+      { name: 'Dusty Pink',  value: '#FAF0F0' },
+      { name: 'Rose',        value: '#F2D9D9' },
+      { name: 'Deep Rose',   value: '#E8C4C4' },
+    ],
+  },
+  {
+    label: 'Blue',
+    colors: [
+      { name: 'Powder Blue', value: '#EDF4FB' },
+      { name: 'Sky Blue',    value: '#D5E8F5' },
+      { name: 'Steel Blue',  value: '#BDDAEE' },
+    ],
+  },
+  {
+    label: 'Lavender',
+    colors: [
+      { name: 'Soft Lavender', value: '#F2EEF8' },
+      { name: 'Lavender',      value: '#DDD4F0' },
+      { name: 'Deep Lavender', value: '#C8BAE8' },
+    ],
+  },
+  {
+    label: 'Green',
+    colors: [
+      { name: 'Sage Mist',   value: '#EEF4EE' },
+      { name: 'Sage',        value: '#D3E5D3' },
+      { name: 'Deep Sage',   value: '#B8D5B8' },
+    ],
+  },
+  {
+    label: 'Peach',
+    colors: [
+      { name: 'Peach Cream', value: '#FBF2E9' },
+      { name: 'Peach',       value: '#F5E0CB' },
+      { name: 'Deep Peach',  value: '#EDCBAA' },
+    ],
+  },
+  {
+    label: 'Yellow',
+    colors: [
+      { name: 'Butter',      value: '#F9F5E4' },
+      { name: 'Honey',       value: '#F3E8C2' },
+      { name: 'Maize',       value: '#EDD99A' },
+    ],
+  },
+  {
+    label: 'Mint',
+    colors: [
+      { name: 'Mint',        value: '#EBF6F1' },
+      { name: 'Teal Mist',   value: '#CEEAE0' },
+      { name: 'Deep Teal',   value: '#B0DCCF' },
+    ],
+  },
+  {
+    label: 'Blush',
+    colors: [
+      { name: 'Blush',       value: '#F8EEED' },
+      { name: 'Blush Rose',  value: '#F0D5D2' },
+      { name: 'Deep Blush',  value: '#E6BFBB' },
+    ],
+  },
+  {
+    label: 'Lilac',
+    colors: [
+      { name: 'Lilac Mist',  value: '#F0EDF8' },
+      { name: 'Lilac',       value: '#E0D4F0' },
+      { name: 'Deep Lilac',  value: '#CFC0E8' },
+    ],
+  },
 ]
 
 function getActiveBg() {
@@ -75,27 +145,34 @@ export function CategorySettings({ onBack }: Props) {
 
       {/* Background colour */}
       <div className="bg-surface border border-border rounded-xl shadow-sm p-4 mb-6">
-        <h3 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-3">Background colour</h3>
-        <div className="flex flex-wrap gap-3">
-          {BG_COLORS.map(c => (
-            <button
-              key={c.value}
-              onClick={() => handleBgSelect(c.value)}
-              title={c.name}
-              className="relative w-10 h-10 rounded-full border-2 transition-all hover:scale-110"
-              style={{
-                backgroundColor: c.value,
-                borderColor: activeBg === c.value ? '#4A6741' : '#E8E7E3',
-              }}
-            >
-              {activeBg === c.value && (
-                <span className="absolute inset-0 flex items-center justify-center text-accent text-[14px] font-bold">✓</span>
-              )}
-            </button>
+        <h3 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-4">Background colour</h3>
+        <div className="space-y-3">
+          {BG_COLOR_GROUPS.map(group => (
+            <div key={group.label} className="flex items-center gap-3">
+              <span className="text-[10px] text-muted w-14 flex-shrink-0 uppercase tracking-wide">{group.label}</span>
+              <div className="flex gap-2">
+                {group.colors.map(c => (
+                  <button
+                    key={c.value}
+                    onClick={() => handleBgSelect(c.value)}
+                    title={c.name}
+                    className="relative w-9 h-9 rounded-full border-2 transition-all hover:scale-110"
+                    style={{
+                      backgroundColor: c.value,
+                      borderColor: activeBg === c.value ? '#4A6741' : '#E8E7E3',
+                    }}
+                  >
+                    {activeBg === c.value && (
+                      <span className="absolute inset-0 flex items-center justify-center text-accent text-[13px] font-bold">✓</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
-        <div className="mt-2 text-[11px] text-muted">
-          {BG_COLORS.find(c => c.value === activeBg)?.name ?? 'Custom'}
+        <div className="mt-3 text-[11px] text-muted">
+          {BG_COLOR_GROUPS.flatMap(g => g.colors).find(c => c.value === activeBg)?.name ?? 'Custom'}
         </div>
       </div>
 
