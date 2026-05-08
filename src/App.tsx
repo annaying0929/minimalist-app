@@ -2,15 +2,16 @@ import { useState, useEffect, useMemo } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
 import { useStore } from './hooks/useStore'
-import { CATEGORIES } from './data/categories'
+import { useCategories } from './context/CategoryContext'
 import { Nav } from './components/Nav'
 import { Dashboard } from './components/Dashboard'
 import { History } from './components/History'
+import { CategorySettings } from './components/CategorySettings'
 import { LogModal } from './components/LogModal'
 import { Auth } from './components/Auth'
 import type { Entry, EntryType } from './types'
 
-type Page = 'dashboard' | 'history'
+type Page = 'dashboard' | 'history' | 'categories'
 
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
@@ -19,6 +20,7 @@ export default function App() {
   const [modalCategoryId, setModalCategoryId] = useState<string | undefined>()
   const [editEntry, setEditEntry] = useState<Entry | undefined>()
   const { entries, loading, saveError, addEntry, updateEntry, deleteEntry } = useStore(session?.user.id)
+  const { categories } = useCategories()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
@@ -30,7 +32,6 @@ export default function App() {
 
   const debtMap = useMemo(() => {
     const map: Record<string, number> = {}
-    CATEGORIES.forEach(c => { map[c.id] = 0 })
     for (const e of entries) {
       map[e.categoryId] = (map[e.categoryId] ?? 0) + (e.type === 'bought' ? e.quantity : -e.quantity)
     }
@@ -78,9 +79,11 @@ export default function App() {
       {loading ? (
         <div className="flex items-center justify-center pt-20 text-muted text-sm">Loading entries…</div>
       ) : page === 'dashboard' ? (
-        <Dashboard entries={entries} onLogEntry={openModal} onDelete={deleteEntry} onEdit={openEditModal} />
-      ) : (
+        <Dashboard entries={entries} onLogEntry={openModal} onDelete={deleteEntry} onEdit={openEditModal} categories={categories} />
+      ) : page === 'history' ? (
         <History entries={entries} onDelete={deleteEntry} onEdit={openEditModal} />
+      ) : (
+        <CategorySettings onBack={() => setPage('dashboard')} />
       )}
       <LogModal
         open={modalOpen}

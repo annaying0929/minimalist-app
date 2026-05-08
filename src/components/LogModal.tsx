@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Entry, EntryType } from '../types';
-import { CATEGORIES } from '../data/categories';
+import { useCategories } from '../context/CategoryContext';
 
 interface Props {
   open: boolean;
@@ -13,8 +13,9 @@ interface Props {
 }
 
 export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, onUpdate, debtMap }: Props) {
+  const { categories } = useCategories();
   const [type, setType] = useState<EntryType>('bought');
-  const [categoryId, setCategoryId] = useState(initialCategoryId ?? CATEGORIES[0].id);
+  const [categoryId, setCategoryId] = useState(initialCategoryId ?? categories[0]?.id ?? '');
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [value, setValue] = useState('');
@@ -28,7 +29,7 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
         setQuantity(String(editEntry.quantity));
         setValue(editEntry.estimatedValue > 0 ? String(editEntry.estimatedValue) : '');
       } else {
-        setCategoryId(initialCategoryId ?? CATEGORIES[0].id);
+        setCategoryId(initialCategoryId ?? categories[0]?.id ?? '');
         setName('');
         setQuantity('1');
         setValue('');
@@ -58,13 +59,13 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
     if (type === 'bought') {
       const after = debt + qty;
       if (debt > 0) {
-        return { text: `${CATEGORIES.find(c => c.id === categoryId)?.name} already has ${debt} pending discard${debt > 1 ? 's' : ''}. After this you'll owe ${after} item${after > 1 ? 's' : ''}.`, style: 'bg-warn-lt border-warn/30 text-warn' };
+        return { text: `${categories.find(c => c.id === categoryId)?.name} already has ${debt} pending discard${debt > 1 ? 's' : ''}. After this you'll owe ${after} item${after > 1 ? 's' : ''}.`, style: 'bg-warn-lt border-warn/30 text-warn' };
       }
-      return { text: `${CATEGORIES.find(c => c.id === categoryId)?.name} is clear. This purchase will require ${qty} discard${qty > 1 ? 's' : ''}.`, style: 'bg-accent-lt border-accent/30 text-accent' };
+      return { text: `${categories.find(c => c.id === categoryId)?.name} is clear. This purchase will require ${qty} discard${qty > 1 ? 's' : ''}.`, style: 'bg-accent-lt border-accent/30 text-accent' };
     } else {
       if (debt > 0) {
         const after = Math.max(0, debt - qty);
-        return { text: `This will reduce the ${CATEGORIES.find(c => c.id === categoryId)?.name} debt to ${after} item${after !== 1 ? 's' : ''}.`, style: 'bg-accent-lt border-accent/30 text-accent' };
+        return { text: `This will reduce the ${categories.find(c => c.id === categoryId)?.name} debt to ${after} item${after !== 1 ? 's' : ''}.`, style: 'bg-accent-lt border-accent/30 text-accent' };
       }
       return null;
     }
@@ -122,7 +123,7 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
               onChange={e => setCategoryId(e.target.value)}
               className="w-full px-3 py-2.5 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent focus:bg-white transition-colors"
             >
-              {CATEGORIES.map(c => (
+              {categories.map(c => (
                 <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
               ))}
             </select>

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import type { Entry } from '../types';
-import { CATEGORIES } from '../data/categories';
+import { useCategories } from '../context/CategoryContext';
 
 interface Props {
   entries: Entry[]
@@ -9,6 +9,7 @@ interface Props {
 }
 
 export function History({ entries, onDelete, onEdit }: Props) {
+  const { categories } = useCategories();
   const [typeFilter, setTypeFilter] = useState<'all' | 'bought' | 'discarded'>('all');
   const [catFilter, setCatFilter] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
@@ -54,7 +55,7 @@ export function History({ entries, onDelete, onEdit }: Props) {
         ))}
         <div className="w-px bg-border mx-1" />
         {usedCatIds.map(id => {
-          const cat = CATEGORIES.find(c => c.id === id);
+          const cat = categories.find(c => c.id === id);
           if (!cat) return null;
           return (
             <button
@@ -88,7 +89,7 @@ export function History({ entries, onDelete, onEdit }: Props) {
             <div></div>
           </div>
           {filtered.map((entry, i) => {
-            const cat = CATEGORIES.find(c => c.id === entry.categoryId);
+            const cat = categories.find(c => c.id === entry.categoryId);
             const isBought = entry.type === 'bought';
             const confirming = confirmId === entry.id;
             return (

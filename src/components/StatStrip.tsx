@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import type { Entry } from '../types';
-import { CATEGORIES } from '../data/categories';
 
 interface Props { entries: Entry[] }
 
@@ -11,8 +10,6 @@ function fmt(n: number) {
 export function StatStrip({ entries }: Props) {
   const stats = useMemo(() => {
     const debtMap: Record<string, number> = {};
-    CATEGORIES.forEach(c => { debtMap[c.id] = 0; });
-
     let totalBought = 0, totalDiscarded = 0, totalSpent = 0, totalDiscardedValue = 0;
 
     for (const e of entries) {

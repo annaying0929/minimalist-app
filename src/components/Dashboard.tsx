@@ -1,17 +1,17 @@
-import type { Entry } from '../types';
-import { CATEGORIES } from '../data/categories';
+import type { Category, Entry } from '../types';
 import { StatStrip } from './StatStrip';
 import { CategoryCard } from './CategoryCard';
 import { ActivityFeed } from './ActivityFeed';
 
 interface Props {
   entries: Entry[];
+  categories: Category[];
   onLogEntry: (categoryId?: string) => void;
   onDelete: (id: string) => void;
   onEdit: (entry: Entry) => void;
 }
 
-export function Dashboard({ entries, onLogEntry, onDelete, onEdit }: Props) {
+export function Dashboard({ entries, categories, onLogEntry, onDelete, onEdit }: Props) {
   return (
     <main className="max-w-4xl mx-auto px-6 py-7 pb-16">
       <StatStrip entries={entries} />
@@ -20,7 +20,7 @@ export function Dashboard({ entries, onLogEntry, onDelete, onEdit }: Props) {
         <h2 className="text-[11px] font-semibold text-muted uppercase tracking-widest">Categories</h2>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
-        {CATEGORIES.map(cat => (
+        {categories.map(cat => (
           <CategoryCard
             key={cat.id}
             category={cat}

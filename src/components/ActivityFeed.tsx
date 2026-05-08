@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Entry } from '../types';
-import { CATEGORIES } from '../data/categories';
+import { useCategories } from '../context/CategoryContext';
 
 interface Props {
   entries: Entry[]
@@ -19,6 +19,7 @@ function relativeDate(iso: string) {
 }
 
 export function ActivityFeed({ entries, onDelete, onEdit }: Props) {
+  const { categories } = useCategories();
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const recent = entries.slice(0, 10);
 
@@ -42,7 +43,7 @@ export function ActivityFeed({ entries, onDelete, onEdit }: Props) {
   return (
     <div className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
       {recent.map((entry, i) => {
-        const cat = CATEGORIES.find(c => c.id === entry.categoryId);
+        const cat = categories.find(c => c.id === entry.categoryId);
         const isBought = entry.type === 'bought';
         const confirming = confirmId === entry.id;
         return (
