@@ -10,7 +10,7 @@ export function Nav({ onSignOut }: NavProps) {
           <path d="M256 106 Q390 256 256 406 Q122 256 256 106 Z" fill="#4A6741"/>
           <line x1="256" y1="106" x2="256" y2="406" stroke="#F7F6F3" strokeWidth="32" strokeLinecap="round"/>
         </svg>
-        one <span className="text-accent">in</span> one out
+        one in one out
       </div>
       <button
         onClick={onSignOut}
