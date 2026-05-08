@@ -51,8 +51,8 @@ export function ActivityFeed({ entries, onDelete, onEdit }: Props) {
             key={entry.id}
             className={`flex items-center gap-3 px-5 py-3.5 ${i < recent.length - 1 ? 'border-b border-border' : ''} ${confirming ? 'bg-red-50' : ''}`}
           >
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm flex-shrink-0 ${isBought ? 'bg-warn-lt' : 'bg-accent-lt'}`}>
-              {isBought ? '🛍️' : '♻️'}
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-base flex-shrink-0 border-2 ${isBought ? 'bg-warn-lt border-warn/30' : 'bg-accent-lt border-accent/30'}`}>
+              {cat?.icon ?? '📦'}
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-[13px] font-medium truncate">{entry.name}</div>
