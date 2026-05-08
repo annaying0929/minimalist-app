@@ -5,7 +5,6 @@ import { useStore } from './hooks/useStore'
 import { useCategories } from './context/CategoryContext'
 import { Nav } from './components/Nav'
 import { BottomNav } from './components/BottomNav'
-import { Dashboard } from './components/Dashboard'
 import { History } from './components/History'
 import { Stats } from './components/Stats'
 import { CategorySettings } from './components/CategorySettings'
@@ -15,17 +14,18 @@ import { DebtFreeBanner } from './components/DebtFreeBanner'
 import { Auth } from './components/Auth'
 import type { Entry, EntryType } from './types'
 
-type Page = 'dashboard' | 'history' | 'stats' | 'categories'
+type Page = 'history' | 'stats' | 'categories'
 
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
-  const [page, setPage] = useState<Page>('dashboard')
+  const [page, setPage] = useState<Page>('stats')
   const [modalOpen, setModalOpen] = useState(false)
   const [modalCategoryId, setModalCategoryId] = useState<string | undefined>()
   const [editEntry, setEditEntry] = useState<Entry | undefined>()
   const [celebrationEntry, setCelebrationEntry] = useState<Entry | null>(null)
   const [celebrationDebt, setCelebrationDebt] = useState(0)
   const [debtFreeSeen, setDebtFreeSeen] = useState(false)
+  const [showDebtFree, setShowDebtFree] = useState(false)
   const { entries, loading, saveError, addEntry, updateEntry, deleteEntry } = useStore(session?.user.id)
   const { categories, deleteCategory } = useCategories()
 
@@ -52,8 +52,6 @@ export default function App() {
     return categories.every(cat => (debtMap[cat.id] ?? 0) <= 0)
   }, [entries, categories, debtMap])
 
-  // Show debt-free banner when it transitions to true (not on first load)
-  const [showDebtFree, setShowDebtFree] = useState(false)
   useEffect(() => {
     if (isDebtFree && prevDebtFreeRef.current === false && entries.length > 0 && !debtFreeSeen) {
       setShowDebtFree(true)
@@ -102,14 +100,12 @@ export default function App() {
       )}
       {loading ? (
         <div className="flex items-center justify-center pt-20 text-muted text-sm">Loading entries…</div>
-      ) : page === 'dashboard' ? (
-        <Dashboard entries={entries} onLogEntry={openModal} onDelete={deleteEntry} onEdit={openEditModal} categories={categories} />
+      ) : page === 'stats' ? (
+        <Stats entries={entries} categories={categories} onLogEntry={openModal} />
       ) : page === 'history' ? (
         <History entries={entries} onDelete={deleteEntry} onEdit={openEditModal} />
-      ) : page === 'stats' ? (
-        <Stats entries={entries} />
       ) : (
-        <CategorySettings onBack={() => setPage('dashboard')} />
+        <CategorySettings />
       )}
 
       <BottomNav page={page} onPageChange={setPage} onLogEntry={() => openModal()} />

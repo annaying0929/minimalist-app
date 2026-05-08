@@ -95,9 +95,7 @@ function applyBg(value: string) {
   localStorage.setItem('bg-color', value)
 }
 
-interface Props { onBack: () => void }
-
-export function CategorySettings({ onBack }: Props) {
+export function CategorySettings() {
   const { categories, deletedCategories, builtinIds, updateCategory, addCategory, deleteCategory, restoreCategory } = useCategories()
   const [activeBg, setActiveBg] = useState(getActiveBg)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -133,15 +131,7 @@ export function CategorySettings({ onBack }: Props) {
 
   return (
     <main className="max-w-4xl mx-auto px-6 py-7 pb-28">
-      <div className="flex items-center gap-3 mb-6">
-        <button
-          onClick={onBack}
-          className="text-[13px] text-muted hover:text-[#1C1C1A] transition-colors"
-        >
-          ← Back
-        </button>
-        <h2 className="text-base font-semibold">Settings</h2>
-      </div>
+      <h2 className="text-base font-semibold mb-6">Settings</h2>
 
       {/* Background colour */}
       <div className="bg-surface border border-border rounded-xl shadow-sm p-4 mb-6">

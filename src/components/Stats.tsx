@@ -1,8 +1,11 @@
 import { useMemo } from 'react'
-import type { Entry } from '../types'
+import type { Category, Entry } from '../types'
+import { CategoryCard } from './CategoryCard'
 
 interface Props {
   entries: Entry[]
+  categories: Category[]
+  onLogEntry: (categoryId?: string) => void
 }
 
 interface Badge {
@@ -23,7 +26,20 @@ function monthLabel(key: string) {
   return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('en-GB', { month: 'short' })
 }
 
-export function Stats({ entries }: Props) {
+function fmt(n: number) {
+  return `£ ${n.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+}
+
+export function Stats({ entries, categories, onLogEntry }: Props) {
+  const financials = useMemo(() => {
+    let totalSpent = 0, totalDiscardedValue = 0
+    for (const e of entries) {
+      if (e.type === 'bought') totalSpent += e.estimatedValue
+      else totalDiscardedValue += e.estimatedValue
+    }
+    return { totalSpent, totalDiscardedValue }
+  }, [entries])
+
   const totalDiscarded = useMemo(
     () => entries.filter(e => e.type === 'discarded').reduce((s, e) => s + e.quantity, 0),
     [entries]
@@ -48,7 +64,7 @@ export function Stats({ entries }: Props) {
     { id: 'hundred', icon: '🏆', label: 'Champion', description: 'Discard 100 items', unlocked: totalDiscarded >= 100 },
     { id: 'cat1', icon: '✨', label: 'Balanced', description: 'Clear your first category', unlocked: clearedCategories >= 1 },
     { id: 'cat5', icon: '🎯', label: 'Focused', description: 'Clear 5 categories', unlocked: clearedCategories >= 5 },
-    { id: 'catall', icon: '👑', label: 'All clear', description: 'Every category balanced', unlocked: clearedCategories >= 15 },
+    { id: 'catall', icon: '👑', label: 'All clear', description: 'Every category balanced', unlocked: clearedCategories >= categories.length && categories.length > 0 },
   ]
 
   // Monthly chart — last 6 months
@@ -75,25 +91,49 @@ export function Stats({ entries }: Props) {
 
   const maxVal = Math.max(...chartData.flatMap(d => [d.bought, d.discarded]), 1)
 
-  const unlockedCount = badges.filter(b => b.unlocked).length
+  const sortedCategories = useMemo(() => {
+    const debtMap: Record<string, number> = {}
+    for (const e of entries) {
+      debtMap[e.categoryId] = (debtMap[e.categoryId] ?? 0) + (e.type === 'bought' ? e.quantity : -e.quantity)
+    }
+    return [...categories].sort((a, b) => (debtMap[b.id] ?? 0) - (debtMap[a.id] ?? 0))
+  }, [entries, categories])
 
   return (
-    <main className="max-w-4xl mx-auto px-6 py-7 pb-24">
+    <main className="max-w-4xl mx-auto px-6 py-7 pb-28">
 
-      {/* Summary row */}
-      <div className="grid grid-cols-3 gap-3 mb-7">
-        <div className="bg-surface border border-border rounded-xl p-4 text-center shadow-sm">
-          <div className="text-[22px] font-bold text-accent">{totalDiscarded}</div>
-          <div className="text-[11px] text-muted mt-0.5">Items discarded</div>
+      {/* Financial summary */}
+      <div className="grid grid-cols-2 gap-3 mb-7">
+        <div className="bg-surface border border-border rounded-xl p-4 shadow-sm">
+          <div className="text-[11px] text-muted uppercase tracking-wide mb-1.5">Spent on bought</div>
+          <div className="text-[22px] font-semibold tracking-tight text-warn">{fmt(financials.totalSpent)}</div>
+          <div className="text-[11px] text-muted mt-0.5">estimated total</div>
         </div>
-        <div className="bg-surface border border-border rounded-xl p-4 text-center shadow-sm">
-          <div className="text-[22px] font-bold text-accent">{clearedCategories}</div>
-          <div className="text-[11px] text-muted mt-0.5">Cats cleared</div>
+        <div className="bg-surface border border-border rounded-xl p-4 shadow-sm">
+          <div className="text-[11px] text-muted uppercase tracking-wide mb-1.5">Value discarded</div>
+          <div className="text-[22px] font-semibold tracking-tight text-accent">{fmt(financials.totalDiscardedValue)}</div>
+          <div className="text-[11px] text-muted mt-0.5">estimated value freed</div>
         </div>
-        <div className="bg-surface border border-border rounded-xl p-4 text-center shadow-sm">
-          <div className="text-[22px] font-bold text-accent">{unlockedCount}/{badges.length}</div>
-          <div className="text-[11px] text-muted mt-0.5">Badges</div>
-        </div>
+      </div>
+
+      {/* Category balance grid */}
+      <h2 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-3">Category balance</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-7">
+        {sortedCategories.map(cat => (
+          <CategoryCard
+            key={cat.id}
+            category={cat}
+            entries={entries}
+            onLogEntry={() => onLogEntry(cat.id)}
+          />
+        ))}
+        <button
+          onClick={() => onLogEntry()}
+          className="flex flex-col items-center justify-center gap-2 bg-surface border-2 border-dashed border-border rounded-xl p-4 shadow-sm text-muted hover:border-accent hover:text-accent transition-colors min-h-[100px]"
+        >
+          <span className="text-2xl font-light leading-none">+</span>
+          <span className="text-[12px] font-medium">Add category</span>
+        </button>
       </div>
 
       {/* Monthly chart */}
@@ -134,11 +174,11 @@ export function Stats({ entries }: Props) {
         {badges.map(b => (
           <div
             key={b.id}
-            className={`bg-surface border rounded-xl p-4 shadow-sm flex items-center gap-3 transition-opacity ${
+            className={`bg-surface border rounded-xl p-4 shadow-sm flex items-center gap-3 ${
               b.unlocked ? 'border-accent/30' : 'border-border opacity-40'
             }`}
           >
-            <span className={`text-3xl ${b.unlocked ? '' : 'grayscale'}`} style={b.unlocked ? {} : { filter: 'grayscale(1)' }}>
+            <span className="text-3xl" style={b.unlocked ? {} : { filter: 'grayscale(1)' }}>
               {b.icon}
             </span>
             <div className="min-w-0">

@@ -37,8 +37,25 @@ export function History({ entries, onDelete, onEdit }: Props) {
     }
   }
 
+  const totalDiscarded = useMemo(
+    () => entries.filter(e => e.type === 'discarded').reduce((s, e) => s + e.quantity, 0),
+    [entries]
+  )
+
   return (
     <main className="max-w-4xl mx-auto px-6 py-7 pb-28">
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="bg-surface border border-border rounded-xl p-4 shadow-sm">
+          <div className="text-[11px] text-muted uppercase tracking-wide mb-1.5">Total discarded</div>
+          <div className="text-[22px] font-semibold tracking-tight text-accent">{totalDiscarded}</div>
+          <div className="text-[11px] text-muted mt-0.5">items freed</div>
+        </div>
+        <div className="bg-surface border border-border rounded-xl p-4 shadow-sm">
+          <div className="text-[11px] text-muted uppercase tracking-wide mb-1.5">Total entries</div>
+          <div className="text-[22px] font-semibold tracking-tight text-[#1C1C1A]">{entries.length}</div>
+          <div className="text-[11px] text-muted mt-0.5">bought + discarded</div>
+        </div>
+      </div>
       <div className="flex flex-wrap gap-2 mb-5">
         {(['all', 'bought', 'discarded'] as const).map(f => (
           <button

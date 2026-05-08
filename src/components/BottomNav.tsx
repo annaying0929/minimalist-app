@@ -1,4 +1,4 @@
-type Page = 'dashboard' | 'history' | 'stats' | 'categories'
+type Page = 'history' | 'stats' | 'categories'
 
 interface Props {
   page: Page
@@ -8,20 +8,8 @@ interface Props {
 
 export function BottomNav({ page, onPageChange, onLogEntry }: Props) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-border safe-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-border">
       <div className="flex items-end justify-around max-w-md mx-auto h-16">
-
-        {/* Home */}
-        <button
-          onClick={() => onPageChange('dashboard')}
-          className={`flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors ${page === 'dashboard' ? 'text-accent' : 'text-muted'}`}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
-          </svg>
-          <span className="text-[10px] font-medium">Home</span>
-        </button>
 
         {/* Stats */}
         <button
@@ -33,14 +21,14 @@ export function BottomNav({ page, onPageChange, onLogEntry }: Props) {
             <line x1="12" y1="20" x2="12" y2="4"/>
             <line x1="6" y1="20" x2="6" y2="14"/>
           </svg>
-          <span className="text-[10px] font-medium">Stats</span>
+          <span className="text-[10px] font-medium">Balance</span>
         </button>
 
         {/* Centre + button */}
-        <div className="flex flex-col items-center justify-center flex-1 h-full relative">
+        <div className="flex flex-col items-center justify-center flex-1 h-full">
           <button
             onClick={onLogEntry}
-            className="w-14 h-14 rounded-full bg-accent text-white flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity -mt-6"
+            className="w-14 h-14 rounded-full bg-accent text-white flex items-center justify-center hover:opacity-90 transition-opacity -mt-6"
             style={{ boxShadow: '0 4px 18px rgba(74,103,65,0.35)' }}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
