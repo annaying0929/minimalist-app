@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, onUpdate, debtMap }: Props) {
-  const { categories, addCategory } = useCategories();
+  const { categories } = useCategories();
   const [type, setType] = useState<EntryType>('bought');
   const [categoryName, setCategoryName] = useState('');
   const [name, setName] = useState('');
@@ -41,23 +41,15 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
   }, [open, initialCategoryId, editEntry]);
 
   const matchedCat = categories.find(c => c.name.toLowerCase() === categoryName.trim().toLowerCase());
-  const isNew = categoryName.trim().length > 0 && !matchedCat;
   const resolvedId = matchedCat?.id ?? '';
   const debt = debtMap[resolvedId] ?? 0;
   const qty = Math.max(1, parseInt(quantity) || 1);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !categoryName.trim()) return;
+    if (!name.trim() || !matchedCat) return;
 
-    let catId: string;
-    if (matchedCat) {
-      catId = matchedCat.id;
-    } else {
-      catId = addCategory(categoryName.trim(), '📦');
-    }
-
-    const fields = { type, categoryId: catId, name: name.trim(), quantity: Math.max(1, parseInt(quantity) || 1), estimatedValue: parseFloat(value) || 0 };
+    const fields = { type, categoryId: matchedCat.id, name: name.trim(), quantity: Math.max(1, parseInt(quantity) || 1), estimatedValue: parseFloat(value) || 0 };
     if (editEntry && onUpdate) {
       onUpdate(editEntry.id, fields);
     } else {
@@ -139,28 +131,21 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
               placeholder="Type a category name…"
               autoComplete="off"
               list="category-list"
-              className={`w-full px-3 py-2.5 border rounded-lg text-[13px] bg-bg focus:outline-none focus:bg-white transition-colors ${
-                isNew ? 'border-accent focus:border-accent' : 'border-border focus:border-accent'
-              }`}
+              className="w-full px-3 py-2.5 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent focus:bg-white transition-colors"
             />
             <datalist id="category-list">
               {categories.map(c => (
                 <option key={c.id} value={c.name} />
               ))}
             </datalist>
-            {isNew && (
-              <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-accent-lt border border-accent/30 rounded-lg">
-                <span className="text-lg">📦</span>
-                <span className="text-[12px] text-accent font-medium">
-                  New category "<strong>{categoryName.trim()}</strong>" will be created
-                </span>
-              </div>
-            )}
             {matchedCat && (
               <div className="mt-1.5 flex items-center gap-1.5">
                 <span className="text-base leading-none">{matchedCat.icon}</span>
                 <span className="text-[11px] text-muted">{matchedCat.name}</span>
               </div>
+            )}
+            {categoryName.trim() && !matchedCat && (
+              <p className="mt-1.5 text-[11px] text-warn">No matching category — add one from the dashboard first.</p>
             )}
           </div>
 
