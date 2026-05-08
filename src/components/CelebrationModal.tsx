@@ -7,12 +7,17 @@ interface Props {
   onClose: () => void;
 }
 
+function fmt(n: number) {
+  return `£ ${n.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+}
+
 export function CelebrationModal({ entry, debtAfter, onClose }: Props) {
   const { categories } = useCategories();
   if (!entry) return null;
 
   const cat = categories.find(c => c.id === entry.categoryId);
   const cleared = debtAfter <= 0;
+  const isDonated = entry.discardMethod === 'donated';
 
   return (
     <div
@@ -23,25 +28,46 @@ export function CelebrationModal({ entry, debtAfter, onClose }: Props) {
         className="bg-surface rounded-2xl p-8 w-full max-w-sm shadow-2xl text-center animate-[slideUp_0.22s_ease]"
         onClick={e => e.stopPropagation()}
       >
-        {/* Stars */}
-        <div className="flex justify-center gap-1 text-3xl mb-1 animate-[slideUp_0.3s_ease]">
-          <span>⭐</span><span>🌟</span><span>⭐</span>
-        </div>
-        <div className="flex justify-center gap-2 text-xl mb-5">
-          <span>✨</span><span>✨</span><span>✨</span>
-        </div>
+        {/* Emoji header — different per action */}
+        {isDonated ? (
+          <>
+            <div className="flex justify-center gap-1 text-3xl mb-1 animate-[slideUp_0.3s_ease]">
+              <span>💚</span><span>🌟</span><span>💚</span>
+            </div>
+            <div className="flex justify-center gap-2 text-xl mb-5">
+              <span>✨</span><span>✨</span><span>✨</span>
+            </div>
+            <h2 className="text-[22px] font-semibold text-[#1C1C1A] mb-1">That's generous!</h2>
+            <p className="text-[13px] text-muted mb-5">Someone else will love this</p>
+          </>
+        ) : (
+          <>
+            <div className="flex justify-center gap-1 text-3xl mb-1 animate-[slideUp_0.3s_ease]">
+              <span>⭐</span><span>🌟</span><span>⭐</span>
+            </div>
+            <div className="flex justify-center gap-2 text-xl mb-5">
+              <span>✨</span><span>✨</span><span>✨</span>
+            </div>
+            <h2 className="text-[22px] font-semibold text-[#1C1C1A] mb-1">Well done!</h2>
+            <p className="text-[13px] text-muted mb-5">One step closer to balance</p>
+          </>
+        )}
 
-        <h2 className="text-[22px] font-semibold text-[#1C1C1A] mb-1">Congratulations!</h2>
-        <p className="text-[13px] text-muted mb-5">One step closer to balance</p>
-
-        {/* What was discarded */}
-        <div className="bg-accent-lt border border-accent/20 rounded-xl px-4 py-3.5 mb-4 text-left">
-          <p className="text-[11px] text-accent font-semibold uppercase tracking-wide mb-1">Discarded</p>
+        {/* Item card */}
+        <div className={`border rounded-xl px-4 py-3.5 mb-4 text-left ${isDonated ? 'bg-accent-lt border-accent/25' : 'bg-bg border-border'}`}>
+          <p className={`text-[11px] font-semibold uppercase tracking-wide mb-1 ${isDonated ? 'text-accent' : 'text-muted'}`}>
+            {isDonated ? '💚 Donated to charity' : '🗑️ Thrown away'}
+          </p>
           <p className="text-[15px] font-medium text-[#1C1C1A]">
             {entry.name}{entry.quantity > 1 ? ` ×${entry.quantity}` : ''}
           </p>
           {cat && (
             <p className="text-[12px] text-muted mt-0.5">{cat.icon} {cat.name}</p>
+          )}
+          {isDonated && entry.donationValue > 0 && (
+            <p className="text-[12px] text-accent font-medium mt-2">
+              Est. resale {fmt(entry.donationValue)} — back in the community
+            </p>
           )}
         </div>
 
@@ -62,9 +88,9 @@ export function CelebrationModal({ entry, debtAfter, onClose }: Props) {
 
         <button
           onClick={onClose}
-          className="w-full py-2.5 bg-accent text-white rounded-lg text-[13px] font-medium hover:opacity-90 transition-opacity"
+          className={`w-full py-2.5 rounded-lg text-[13px] font-medium hover:opacity-90 transition-opacity text-white ${isDonated ? 'bg-accent' : 'bg-[#1C1C1A]'}`}
         >
-          Keep going! 💪
+          {isDonated ? 'Keep giving! 💚' : 'Keep going! 💪'}
         </button>
       </div>
     </div>
