@@ -8,6 +8,7 @@ import { Dashboard } from './components/Dashboard'
 import { History } from './components/History'
 import { CategorySettings } from './components/CategorySettings'
 import { LogModal } from './components/LogModal'
+import { CelebrationModal } from './components/CelebrationModal'
 import { Auth } from './components/Auth'
 import type { Entry, EntryType } from './types'
 
@@ -19,6 +20,8 @@ export default function App() {
   const [modalOpen, setModalOpen] = useState(false)
   const [modalCategoryId, setModalCategoryId] = useState<string | undefined>()
   const [editEntry, setEditEntry] = useState<Entry | undefined>()
+  const [celebrationEntry, setCelebrationEntry] = useState<Entry | null>(null)
+  const [celebrationDebt, setCelebrationDebt] = useState(0)
   const { entries, loading, saveError, addEntry, updateEntry, deleteEntry } = useStore(session?.user.id)
   const { categories, deleteCategory } = useCategories()
 
@@ -51,6 +54,12 @@ export default function App() {
 
   function handleSave(entry: { type: EntryType; categoryId: string; name: string; quantity: number; estimatedValue: number }) {
     addEntry(entry)
+    if (entry.type === 'discarded') {
+      const debtAfter = Math.max(0, (debtMap[entry.categoryId] ?? 0) - entry.quantity)
+      const optimistic: Entry = { ...entry, id: '', date: new Date().toISOString() }
+      setCelebrationEntry(optimistic)
+      setCelebrationDebt(debtAfter)
+    }
   }
 
   if (session === undefined) {
@@ -85,6 +94,11 @@ export default function App() {
       ) : (
         <CategorySettings onBack={() => setPage('dashboard')} />
       )}
+      <CelebrationModal
+        entry={celebrationEntry}
+        debtAfter={celebrationDebt}
+        onClose={() => setCelebrationEntry(null)}
+      />
       <LogModal
         open={modalOpen}
         initialCategoryId={modalCategoryId}
