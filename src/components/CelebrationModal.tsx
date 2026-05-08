@@ -37,8 +37,8 @@ export function CelebrationModal({ entry, debtAfter, onClose }: Props) {
             <div className="flex justify-center gap-2 text-xl mb-5">
               <span>✨</span><span>✨</span><span>✨</span>
             </div>
-            <h2 className="text-[22px] font-semibold text-[#1C1C1A] mb-1">That's generous!</h2>
-            <p className="text-[13px] text-muted mb-5">Someone else will love this</p>
+            <h2 className="text-[22px] font-semibold text-[#1C1C1A] mb-1">It found a new home.</h2>
+            <p className="text-[13px] text-muted mb-5">Someone else will treasure this</p>
           </>
         ) : (
           <>
@@ -48,8 +48,8 @@ export function CelebrationModal({ entry, debtAfter, onClose }: Props) {
             <div className="flex justify-center gap-2 text-xl mb-5">
               <span>✨</span><span>✨</span><span>✨</span>
             </div>
-            <h2 className="text-[22px] font-semibold text-[#1C1C1A] mb-1">Well done!</h2>
-            <p className="text-[13px] text-muted mb-5">One step closer to balance</p>
+            <h2 className="text-[22px] font-semibold text-[#1C1C1A] mb-1">One less thing.</h2>
+            <p className="text-[13px] text-muted mb-5">Your home breathes a little easier</p>
           </>
         )}
 

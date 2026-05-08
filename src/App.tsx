@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
 import { useStore } from './hooks/useStore'
@@ -25,12 +25,9 @@ export default function App() {
   const [editEntry, setEditEntry] = useState<Entry | undefined>()
   const [celebrationEntry, setCelebrationEntry] = useState<Entry | null>(null)
   const [celebrationDebt, setCelebrationDebt] = useState(0)
-  const [debtFreeSeen, setDebtFreeSeen] = useState(false)
-  const [showDebtFree, setShowDebtFree] = useState(false)
+  const [debtFreeSeen, setDebtFreeSeen] = useState(() => localStorage.getItem('debtFreeSeen') === 'true')
   const { entries, loading, saveError, addEntry, updateEntry, deleteEntry } = useStore(session?.user.id)
   const { categories, deleteCategory } = useCategories()
-
-  const prevDebtFreeRef = useRef(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
@@ -53,12 +50,15 @@ export default function App() {
     return categories.every(cat => (debtMap[cat.id] ?? 0) <= 0)
   }, [entries, categories, debtMap])
 
+  // Reset seen flag when user is no longer debt-free so banner can trigger again next time
   useEffect(() => {
-    if (isDebtFree && prevDebtFreeRef.current === false && entries.length > 0 && !debtFreeSeen) {
-      setShowDebtFree(true)
+    if (!isDebtFree && debtFreeSeen) {
+      localStorage.removeItem('debtFreeSeen')
+      setDebtFreeSeen(false)
     }
-    prevDebtFreeRef.current = isDebtFree
-  }, [isDebtFree, entries.length, debtFreeSeen])
+  }, [isDebtFree])
+
+  const showDebtFree = isDebtFree && entries.length > 0 && !debtFreeSeen
 
   function openModal(categoryId?: string) {
     setEditEntry(undefined)
@@ -119,7 +119,7 @@ export default function App() {
         onClose={() => setCelebrationEntry(null)}
       />
       {showDebtFree && (
-        <DebtFreeBanner onClose={() => { setShowDebtFree(false); setDebtFreeSeen(true) }} />
+        <DebtFreeBanner onClose={() => { localStorage.setItem('debtFreeSeen', 'true'); setDebtFreeSeen(true) }} />
       )}
       <LogModal
         open={modalOpen}
