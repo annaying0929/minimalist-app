@@ -45,6 +45,7 @@ export function ActivityFeed({ entries, onDelete, onEdit }: Props) {
       {recent.map((entry, i) => {
         const cat = categories.find(c => c.id === entry.categoryId);
         const isBought = entry.type === 'bought';
+        const isDonated = entry.discardMethod === 'donated';
         const confirming = confirmId === entry.id;
         return (
           <div
@@ -56,16 +57,28 @@ export function ActivityFeed({ entries, onDelete, onEdit }: Props) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-[13px] font-medium truncate">{entry.name}</div>
-              <div className="text-[11px] text-muted mt-0.5">
-                {cat?.name ?? entry.categoryId}
-                {entry.quantity > 1 && ` · qty ${entry.quantity}`}
+              <div className="text-[11px] text-muted mt-0.5 flex items-center gap-1.5">
+                {!isBought && (
+                  <span className={`font-medium ${isDonated ? 'text-accent' : 'text-muted'}`}>
+                    {isDonated ? '💚 Donated' : '🗑️ Thrown'}
+                  </span>
+                )}
+                {!isBought && <span>·</span>}
+                <span>{cat?.name ?? entry.categoryId}</span>
+                {entry.quantity > 1 && <span>· qty {entry.quantity}</span>}
               </div>
             </div>
             <div className="text-right flex-shrink-0 mr-2">
               <div className={`text-[13px] font-medium ${isBought ? 'text-warn' : 'text-accent'}`}>
                 {isBought ? '+' : '−'} £ {entry.estimatedValue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </div>
-              <div className="text-[11px] text-muted mt-0.5">{relativeDate(entry.date)}</div>
+              {isDonated && entry.donationValue > 0 ? (
+                <div className="text-[11px] text-accent mt-0.5">
+                  💚 £ {entry.donationValue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} resale
+                </div>
+              ) : (
+                <div className="text-[11px] text-muted mt-0.5">{relativeDate(entry.date)}</div>
+              )}
             </div>
             {!confirming && (
               <button

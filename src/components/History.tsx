@@ -124,13 +124,20 @@ export function History({ entries, onDelete, onEdit }: Props) {
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${isBought ? 'bg-warn-lt text-warn' : 'bg-accent-lt text-accent'}`}>
-                      {isBought ? 'Bought' : 'Discarded'}
+                      {isBought ? 'Bought' : entry.discardMethod === 'donated' ? '💚 Donated' : '🗑️ Thrown'}
                     </span>
                     <span className="text-[11px] text-muted">{cat?.icon} {cat?.name ?? entry.categoryId}</span>
                   </div>
                 </div>
-                <div className={`text-[13px] font-medium ${isBought ? 'text-warn' : 'text-accent'}`}>
-                  {isBought ? '+' : '−'} £ {entry.estimatedValue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                <div className="text-right">
+                  <div className={`text-[13px] font-medium ${isBought ? 'text-warn' : 'text-accent'}`}>
+                    {isBought ? '+' : '−'} £ {entry.estimatedValue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                  </div>
+                  {entry.discardMethod === 'donated' && entry.donationValue > 0 && (
+                    <div className="text-[11px] text-accent mt-0.5">
+                      💚 £ {entry.donationValue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} resale
+                    </div>
+                  )}
                 </div>
                 <div className="hidden sm:block text-[12px] text-muted whitespace-nowrap">{formatDate(entry.date)}</div>
                 {!confirming && (

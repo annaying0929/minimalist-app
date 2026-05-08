@@ -13,7 +13,7 @@ import { LogModal } from './components/LogModal'
 import { CelebrationModal } from './components/CelebrationModal'
 import { DebtFreeBanner } from './components/DebtFreeBanner'
 import { Auth } from './components/Auth'
-import type { Entry, EntryType } from './types'
+import type { DiscardMethod, Entry, EntryType } from './types'
 
 type Page = 'stats' | 'trends' | 'history' | 'categories'
 
@@ -71,7 +71,7 @@ export default function App() {
     setModalOpen(true)
   }
 
-  function handleSave(entry: { type: EntryType; categoryId: string; name: string; quantity: number; estimatedValue: number }) {
+  function handleSave(entry: { type: EntryType; categoryId: string; name: string; quantity: number; estimatedValue: number; discardMethod: DiscardMethod | null; donationValue: number }) {
     addEntry(entry)
     if (entry.type === 'discarded') {
       const debtAfter = Math.max(0, (debtMap[entry.categoryId] ?? 0) - entry.quantity)

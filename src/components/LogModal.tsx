@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import type { Entry, EntryType } from '../types';
+import type { DiscardMethod, Entry, EntryType } from '../types';
 import { useCategories } from '../context/CategoryContext';
+
+type SaveFields = { type: EntryType; categoryId: string; name: string; quantity: number; estimatedValue: number; discardMethod: DiscardMethod | null; donationValue: number };
 
 interface Props {
   open: boolean;
   initialCategoryId?: string;
   editEntry?: Entry;
   onClose: () => void;
-  onSave: (entry: { type: EntryType; categoryId: string; name: string; quantity: number; estimatedValue: number }) => void;
-  onUpdate?: (id: string, fields: { type: EntryType; categoryId: string; name: string; quantity: number; estimatedValue: number }) => void;
+  onSave: (entry: SaveFields) => void;
+  onUpdate?: (id: string, fields: SaveFields) => void;
   onDeleteCategory?: (id: string) => void;
   debtMap: Record<string, number>;
 }
@@ -16,10 +18,12 @@ interface Props {
 export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, onUpdate, onDeleteCategory, debtMap }: Props) {
   const { categories } = useCategories();
   const [type, setType] = useState<EntryType>('bought');
+  const [discardMethod, setDiscardMethod] = useState<DiscardMethod>('thrown');
   const [categoryId, setCategoryId] = useState('');
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [value, setValue] = useState('');
+  const [donationValue, setDonationValue] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
@@ -27,16 +31,20 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
       setConfirmDelete(false);
       if (editEntry) {
         setType(editEntry.type);
+        setDiscardMethod(editEntry.discardMethod ?? 'thrown');
         setCategoryId(editEntry.categoryId);
         setName(editEntry.name);
         setQuantity(String(editEntry.quantity));
         setValue(editEntry.estimatedValue > 0 ? String(editEntry.estimatedValue) : '');
+        setDonationValue(editEntry.donationValue > 0 ? String(editEntry.donationValue) : '');
       } else {
         setCategoryId(initialCategoryId ?? categories[0]?.id ?? '');
         setName('');
         setQuantity('1');
         setValue('');
+        setDonationValue('');
         setType('bought');
+        setDiscardMethod('thrown');
       }
     }
   }, [open, initialCategoryId, editEntry]);
@@ -50,7 +58,15 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !categoryId) return;
-    const fields = { type, categoryId, name: name.trim(), quantity: Math.max(1, parseInt(quantity) || 1), estimatedValue: parseFloat(value) || 0 };
+    const fields: SaveFields = {
+      type,
+      categoryId,
+      name: name.trim(),
+      quantity: Math.max(1, parseInt(quantity) || 1),
+      estimatedValue: parseFloat(value) || 0,
+      discardMethod: type === 'discarded' ? discardMethod : null,
+      donationValue: type === 'discarded' && discardMethod === 'donated' ? parseFloat(donationValue) || 0 : 0,
+    };
     if (editEntry && onUpdate) {
       onUpdate(editEntry.id, fields);
     } else {
@@ -121,8 +137,8 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
           </div>
         )}
 
-        {/* Toggle */}
-        <div className="grid grid-cols-2 bg-bg rounded-lg p-0.5 mb-5">
+        {/* Type toggle */}
+        <div className="grid grid-cols-2 bg-bg rounded-lg p-0.5 mb-3">
           {(['bought', 'discarded'] as EntryType[]).map(t => (
             <button
               key={t}
@@ -132,10 +148,29 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
                 type === t ? 'bg-surface text-[#1C1C1A] shadow-sm' : 'text-muted'
               }`}
             >
-              {t === 'bought' ? '🛍️  Bought' : '♻️  Discarded'}
+              {t === 'bought' ? '🛍️  Bought' : '♻️  Getting rid of'}
             </button>
           ))}
         </div>
+
+        {/* Discard method sub-toggle */}
+        {type === 'discarded' && (
+          <div className="grid grid-cols-2 bg-bg rounded-lg p-0.5 mb-5">
+            {(['thrown', 'donated'] as DiscardMethod[]).map(m => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setDiscardMethod(m)}
+                className={`py-1.5 rounded-md text-[12px] font-medium transition-all ${
+                  discardMethod === m ? 'bg-surface text-[#1C1C1A] shadow-sm' : 'text-muted'
+                }`}
+              >
+                {m === 'thrown' ? '🗑️  Thrown away' : '💚  Donated'}
+              </button>
+            ))}
+          </div>
+        )}
+        {type === 'bought' && <div className="mb-5" />}
 
         {/* Debt notice */}
         {n && (
@@ -199,6 +234,22 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
               />
             </div>
           </div>
+
+          {type === 'discarded' && discardMethod === 'donated' && (
+            <div>
+              <label className="block text-[11px] font-medium text-muted uppercase tracking-wide mb-1.5">Est. charity resale (£)</label>
+              <input
+                type="number"
+                min={0}
+                step="0.01"
+                value={donationValue}
+                onChange={e => setDonationValue(e.target.value)}
+                placeholder="0.00"
+                className="w-full px-3 py-2.5 border border-accent/40 rounded-lg text-[13px] bg-accent-lt focus:outline-none focus:border-accent focus:bg-white transition-colors"
+              />
+              <p className="text-[11px] text-muted mt-1">What a charity shop might sell it for</p>
+            </div>
+          )}
 
           <div className="flex gap-2.5 justify-end pt-2">
             <button

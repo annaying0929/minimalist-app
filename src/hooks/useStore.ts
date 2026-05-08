@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Entry } from '../types'
+import type { DiscardMethod, Entry } from '../types'
 
 type Row = Record<string, unknown>
 
@@ -12,6 +12,8 @@ function toEntry(row: Row): Entry {
     name:           row.name as string,
     quantity:       row.quantity as number,
     estimatedValue: row.estimated_value as number,
+    discardMethod:  (row.discard_method as DiscardMethod | null) ?? null,
+    donationValue:  (row.donation_value as number | null) ?? 0,
     date:           row.date as string,
   }
 }
@@ -58,6 +60,8 @@ export function useStore(userId: string | undefined) {
       name:            entry.name,
       quantity:        entry.quantity,
       estimated_value: entry.estimatedValue,
+      discard_method:  entry.discardMethod ?? null,
+      donation_value:  entry.donationValue ?? 0,
       user_id:         userId,
     })
 
@@ -76,6 +80,8 @@ export function useStore(userId: string | undefined) {
     if (fields.name !== undefined)           dbFields.name            = fields.name
     if (fields.quantity !== undefined)       dbFields.quantity        = fields.quantity
     if (fields.estimatedValue !== undefined) dbFields.estimated_value = fields.estimatedValue
+    if (fields.discardMethod !== undefined)  dbFields.discard_method  = fields.discardMethod
+    if (fields.donationValue !== undefined)  dbFields.donation_value  = fields.donationValue
     const { error } = await supabase.from('entries').update(dbFields).eq('id', id)
     if (error) console.error('Update error:', error)
   }

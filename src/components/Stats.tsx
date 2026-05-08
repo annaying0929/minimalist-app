@@ -22,12 +22,19 @@ function fmt(n: number) {
 
 export function Stats({ entries, categories, onLogEntry }: Props) {
   const financials = useMemo(() => {
-    let totalSpent = 0, totalDiscardedValue = 0
+    let totalSpent = 0, totalDiscardedValue = 0, totalDonationResale = 0, totalDonatedItems = 0
     for (const e of entries) {
-      if (e.type === 'bought') totalSpent += e.estimatedValue
-      else totalDiscardedValue += e.estimatedValue
+      if (e.type === 'bought') {
+        totalSpent += e.estimatedValue
+      } else {
+        totalDiscardedValue += e.estimatedValue
+        if (e.discardMethod === 'donated') {
+          totalDonationResale += e.donationValue
+          totalDonatedItems += e.quantity
+        }
+      }
     }
-    return { totalSpent, totalDiscardedValue }
+    return { totalSpent, totalDiscardedValue, totalDonationResale, totalDonatedItems }
   }, [entries])
 
   const totalDiscarded = useMemo(
@@ -69,18 +76,40 @@ export function Stats({ entries, categories, onLogEntry }: Props) {
     <main className="max-w-4xl mx-auto px-6 py-7 pb-28">
 
       {/* Financial summary */}
-      <div className="grid grid-cols-2 gap-3 mb-7">
+      <div className="grid grid-cols-2 gap-3 mb-3">
         <div className="bg-surface border border-border rounded-xl p-4 shadow-sm">
           <div className="text-[11px] text-muted uppercase tracking-wide mb-1.5">Spent on bought</div>
           <div className="text-[22px] font-semibold tracking-tight text-warn">{fmt(financials.totalSpent)}</div>
           <div className="text-[11px] text-muted mt-0.5">estimated total</div>
         </div>
         <div className="bg-surface border border-border rounded-xl p-4 shadow-sm">
-          <div className="text-[11px] text-muted uppercase tracking-wide mb-1.5">Value discarded</div>
+          <div className="text-[11px] text-muted uppercase tracking-wide mb-1.5">Value freed</div>
           <div className="text-[22px] font-semibold tracking-tight text-accent">{fmt(financials.totalDiscardedValue)}</div>
-          <div className="text-[11px] text-muted mt-0.5">estimated value freed</div>
+          <div className="text-[11px] text-muted mt-0.5">from all discards</div>
         </div>
       </div>
+
+      {/* Donation impact */}
+      {financials.totalDonatedItems > 0 && (
+        <div className="bg-accent-lt border border-accent/25 rounded-xl p-4 shadow-sm mb-7">
+          <div className="text-[11px] text-accent font-semibold uppercase tracking-wide mb-2">💚 Donation impact</div>
+          <div className="flex items-baseline gap-2">
+            <div className="text-[22px] font-semibold tracking-tight text-accent">{financials.totalDonatedItems}</div>
+            <div className="text-[13px] text-accent">item{financials.totalDonatedItems !== 1 ? 's' : ''} donated</div>
+            {financials.totalDonationResale > 0 && (
+              <>
+                <div className="text-muted mx-1">·</div>
+                <div className="text-[22px] font-semibold tracking-tight text-accent">{fmt(financials.totalDonationResale)}</div>
+                <div className="text-[13px] text-accent">estimated resale</div>
+              </>
+            )}
+          </div>
+          {financials.totalDonationResale > 0 && (
+            <div className="text-[11px] text-accent/70 mt-1">That's money going back into the community</div>
+          )}
+        </div>
+      )}
+      {financials.totalDonatedItems === 0 && <div className="mb-7" />}
 
       {/* Category balance grid */}
       <h2 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-3">Category balance</h2>
