@@ -5,7 +5,11 @@ interface NavProps {
 export function Nav({ onSignOut }: NavProps) {
   return (
     <nav className="bg-surface border-b border-border sticky top-0 z-50 h-14 relative flex items-center justify-center px-6">
-      <div className="text-[15px] font-semibold tracking-wide text-[#1C1C1A]">
+      <div className="flex items-center gap-2 text-[15px] font-semibold tracking-wide text-[#1C1C1A]">
+        <svg width="15" height="15" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M256 106 Q390 256 256 406 Q122 256 256 106 Z" fill="#4A6741"/>
+          <line x1="256" y1="106" x2="256" y2="406" stroke="#F7F6F3" strokeWidth="32" strokeLinecap="round"/>
+        </svg>
         one <span className="text-accent">in,</span> one out
       </div>
       <button

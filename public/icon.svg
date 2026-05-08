@@ -1,17 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#56795A"/>
-      <stop offset="100%" stop-color="#3A5530"/>
-    </linearGradient>
-  </defs>
-
   <!-- Background -->
-  <rect width="512" height="512" rx="114" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="115" fill="#4A6741"/>
 
-  <!-- Arrow IN (→) chevron shape, white, upper half -->
-  <path d="M92,190 L136,162 L336,162 L336,136 L432,190 L336,244 L336,218 L136,218 Z" fill="white"/>
+  <!-- Leaf: two arcs meeting at top and bottom tips -->
+  <path d="M256 106 Q390 256 256 406 Q122 256 256 106 Z" fill="white"/>
 
-  <!-- Arrow OUT (←) chevron shape, softer white, lower half -->
-  <path d="M420,322 L376,294 L176,294 L176,268 L80,322 L176,376 L176,350 L376,350 Z" fill="rgba(255,255,255,0.72)"/>
+  <!-- Center vein -->
+  <line x1="256" y1="106" x2="256" y2="406" stroke="#4A6741" stroke-width="11" stroke-linecap="round"/>
 </svg>
