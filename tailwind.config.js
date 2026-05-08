@@ -9,7 +9,7 @@ export default {
       },
       animation: { slideUp: 'slideUp 0.18s ease' },
       colors: {
-        bg:          '#F7F6F3',
+        bg:          'var(--color-bg)',
         surface:     '#FFFFFF',
         border:      '#E8E7E3',
         muted:       '#8A8A86',

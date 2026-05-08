@@ -1,15 +1,43 @@
 import { useState } from 'react'
 import { useCategories } from '../context/CategoryContext'
 
+const BG_COLORS = [
+  { name: 'Warm White',    value: '#F7F6F3' },
+  { name: 'Dusty Pink',    value: '#FAF0F0' },
+  { name: 'Powder Blue',   value: '#EDF4FB' },
+  { name: 'Soft Lavender', value: '#F2EEF8' },
+  { name: 'Sage Mist',     value: '#EEF4EE' },
+  { name: 'Peach Cream',   value: '#FBF2E9' },
+  { name: 'Mint',          value: '#EBF6F1' },
+  { name: 'Butter',        value: '#F9F5E4' },
+  { name: 'Blush',         value: '#F8EEED' },
+  { name: 'Lilac Mist',    value: '#F0EDF8' },
+]
+
+function getActiveBg() {
+  return localStorage.getItem('bg-color') ?? '#F7F6F3'
+}
+
+function applyBg(value: string) {
+  document.documentElement.style.setProperty('--color-bg', value)
+  localStorage.setItem('bg-color', value)
+}
+
 interface Props { onBack: () => void }
 
 export function CategorySettings({ onBack }: Props) {
   const { categories, builtinIds, updateCategory, addCategory, deleteCategory } = useCategories()
+  const [activeBg, setActiveBg] = useState(getActiveBg)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editIcon, setEditIcon] = useState('')
   const [newName, setNewName] = useState('')
   const [newIcon, setNewIcon] = useState('')
+
+  function handleBgSelect(value: string) {
+    applyBg(value)
+    setActiveBg(value)
+  }
 
   function startEdit(cat: { id: string; name: string; icon: string }) {
     setEditingId(cat.id)
@@ -40,9 +68,37 @@ export function CategorySettings({ onBack }: Props) {
         >
           ← Back
         </button>
-        <h2 className="text-base font-semibold">Categories</h2>
+        <h2 className="text-base font-semibold">Settings</h2>
       </div>
 
+      {/* Background colour */}
+      <div className="bg-surface border border-border rounded-xl shadow-sm p-4 mb-6">
+        <h3 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-3">Background colour</h3>
+        <div className="flex flex-wrap gap-3">
+          {BG_COLORS.map(c => (
+            <button
+              key={c.value}
+              onClick={() => handleBgSelect(c.value)}
+              title={c.name}
+              className="relative w-10 h-10 rounded-full border-2 transition-all hover:scale-110"
+              style={{
+                backgroundColor: c.value,
+                borderColor: activeBg === c.value ? '#4A6741' : '#E8E7E3',
+              }}
+            >
+              {activeBg === c.value && (
+                <span className="absolute inset-0 flex items-center justify-center text-accent text-[14px] font-bold">✓</span>
+              )}
+            </button>
+          ))}
+        </div>
+        <div className="mt-2 text-[11px] text-muted">
+          {BG_COLORS.find(c => c.value === activeBg)?.name ?? 'Custom'}
+        </div>
+      </div>
+
+      {/* Categories */}
+      <h3 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-3">Categories</h3>
       <div className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden mb-6">
         {categories.map((cat, i) => {
           const isCustom = !builtinIds.has(cat.id)
