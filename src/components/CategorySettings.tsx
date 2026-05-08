@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useCategories } from '../context/CategoryContext'
+import { IconPicker } from './IconPicker'
 
 const BG_COLORS = [
   { name: 'Warm White',    value: '#F7F6F3' },
@@ -109,29 +110,26 @@ export function CategorySettings({ onBack }: Props) {
               className={`flex items-center gap-3 px-4 py-3 ${i < categories.length - 1 ? 'border-b border-border' : ''}`}
             >
               {isEditing ? (
-                <>
-                  <input
-                    value={editIcon}
-                    onChange={e => setEditIcon(e.target.value)}
-                    className="w-12 text-center text-xl border border-border rounded-lg py-1.5 bg-bg focus:outline-none focus:border-accent"
-                    placeholder="📦"
-                  />
-                  <input
-                    value={editName}
-                    onChange={e => setEditName(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && saveEdit()}
-                    autoFocus
-                    className="flex-1 px-3 py-1.5 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent"
-                  />
-                  <button
-                    onClick={saveEdit}
-                    className="text-[12px] font-medium px-3 py-1.5 bg-accent text-white rounded-lg hover:opacity-90 whitespace-nowrap"
-                  >Save</button>
-                  <button
-                    onClick={() => setEditingId(null)}
-                    className="text-[12px] text-muted px-2 py-1.5 hover:text-[#1C1C1A] whitespace-nowrap"
-                  >Cancel</button>
-                </>
+                <div className="flex-1 space-y-2">
+                  <IconPicker value={editIcon} onChange={setEditIcon} />
+                  <div className="flex gap-2">
+                    <input
+                      value={editName}
+                      onChange={e => setEditName(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && saveEdit()}
+                      autoFocus
+                      className="flex-1 px-3 py-1.5 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent"
+                    />
+                    <button
+                      onClick={saveEdit}
+                      className="text-[12px] font-medium px-3 py-1.5 bg-accent text-white rounded-lg hover:opacity-90 whitespace-nowrap"
+                    >Save</button>
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="text-[12px] text-muted px-2 py-1.5 hover:text-[#1C1C1A] whitespace-nowrap"
+                    >Cancel</button>
+                  </div>
+                </div>
               ) : (
                 <>
                   <span className="text-xl w-8 text-center flex-shrink-0">{cat.icon}</span>
@@ -158,25 +156,22 @@ export function CategorySettings({ onBack }: Props) {
 
       <div className="bg-surface border border-border rounded-xl shadow-sm p-4">
         <h3 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-3">Add category</h3>
-        <div className="flex gap-2">
-          <input
-            value={newIcon}
-            onChange={e => setNewIcon(e.target.value)}
-            placeholder="📦"
-            className="w-14 text-center text-xl border border-border rounded-lg py-2 bg-bg focus:outline-none focus:border-accent"
-          />
-          <input
-            value={newName}
-            onChange={e => setNewName(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleAdd()}
-            placeholder="Category name"
-            className="flex-1 px-3 py-2 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent"
-          />
-          <button
-            onClick={handleAdd}
-            disabled={!newName.trim()}
-            className="px-4 py-2 bg-accent text-white rounded-lg text-[13px] font-medium hover:opacity-90 transition-opacity disabled:opacity-40"
-          >Add</button>
+        <div className="space-y-2">
+          <IconPicker value={newIcon || '📦'} onChange={setNewIcon} />
+          <div className="flex gap-2">
+            <input
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleAdd()}
+              placeholder="Category name"
+              className="flex-1 px-3 py-2 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent"
+            />
+            <button
+              onClick={handleAdd}
+              disabled={!newName.trim()}
+              className="px-4 py-2 bg-accent text-white rounded-lg text-[13px] font-medium hover:opacity-90 transition-opacity disabled:opacity-40"
+            >Add</button>
+          </div>
         </div>
       </div>
     </main>
