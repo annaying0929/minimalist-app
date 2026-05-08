@@ -2,9 +2,24 @@
   <!-- Background -->
   <rect width="512" height="512" rx="115" fill="#4A6741"/>
 
-  <!-- Leaf: two arcs meeting at top and bottom tips -->
-  <path d="M256 106 Q390 256 256 406 Q122 256 256 106 Z" fill="white"/>
+  <!-- Stem: gentle curve -->
+  <path d="M 256 405 Q 244 290 252 148" stroke="white" stroke-width="16" fill="none" stroke-linecap="round"/>
 
-  <!-- Center vein -->
-  <line x1="256" y1="106" x2="256" y2="406" stroke="#4A6741" stroke-width="11" stroke-linecap="round"/>
+  <!-- Left leaf (lower) -->
+  <g transform="translate(249 332) rotate(-42)">
+    <path d="M 0 0 C 38 -12 44 -70 0 -90 C -44 -70 -38 -12 0 0 Z" fill="white"/>
+    <line x1="0" y1="-2" x2="0" y2="-88" stroke="#4A6741" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Right leaf (middle) -->
+  <g transform="translate(251 248) rotate(38)">
+    <path d="M 0 0 C 38 -12 44 -70 0 -90 C -44 -70 -38 -12 0 0 Z" fill="white"/>
+    <line x1="0" y1="-2" x2="0" y2="-88" stroke="#4A6741" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Top leaf (slight left tilt) -->
+  <g transform="translate(251 178) rotate(-10)">
+    <path d="M 0 0 C 38 -12 44 -70 0 -90 C -44 -70 -38 -12 0 0 Z" fill="white"/>
+    <line x1="0" y1="-2" x2="0" y2="-88" stroke="#4A6741" stroke-width="6" stroke-linecap="round"/>
+  </g>
 </svg>

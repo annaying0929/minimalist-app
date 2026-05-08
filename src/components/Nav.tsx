@@ -7,8 +7,16 @@ export function Nav({ onSignOut }: NavProps) {
     <nav className="bg-surface border-b border-border sticky top-0 z-50 h-14 relative flex items-center justify-center px-6">
       <div className="flex items-center gap-2.5 text-[15px] font-semibold tracking-wide text-[#1C1C1A]">
         <svg width="22" height="22" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M256 106 Q390 256 256 406 Q122 256 256 106 Z" fill="#4A6741"/>
-          <line x1="256" y1="106" x2="256" y2="406" stroke="#F7F6F3" strokeWidth="32" strokeLinecap="round"/>
+          <path d="M 256 405 Q 244 290 252 148" stroke="#4A6741" strokeWidth="16" strokeLinecap="round"/>
+          <g transform="translate(249 332) rotate(-42)">
+            <path d="M 0 0 C 38 -12 44 -70 0 -90 C -44 -70 -38 -12 0 0 Z" fill="#4A6741"/>
+          </g>
+          <g transform="translate(251 248) rotate(38)">
+            <path d="M 0 0 C 38 -12 44 -70 0 -90 C -44 -70 -38 -12 0 0 Z" fill="#4A6741"/>
+          </g>
+          <g transform="translate(251 178) rotate(-10)">
+            <path d="M 0 0 C 38 -12 44 -70 0 -90 C -44 -70 -38 -12 0 0 Z" fill="#4A6741"/>
+          </g>
         </svg>
         one in one out
       </div>
