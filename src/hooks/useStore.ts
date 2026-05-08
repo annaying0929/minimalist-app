@@ -68,11 +68,23 @@ export function useStore(userId: string | undefined) {
     }
   }
 
+  async function updateEntry(id: string, fields: Partial<Omit<Entry, 'id' | 'date'>>) {
+    setEntries(prev => prev.map(e => e.id === id ? { ...e, ...fields } : e))
+    const dbFields: Record<string, unknown> = {}
+    if (fields.type !== undefined)           dbFields.type            = fields.type
+    if (fields.categoryId !== undefined)     dbFields.category_id     = fields.categoryId
+    if (fields.name !== undefined)           dbFields.name            = fields.name
+    if (fields.quantity !== undefined)       dbFields.quantity        = fields.quantity
+    if (fields.estimatedValue !== undefined) dbFields.estimated_value = fields.estimatedValue
+    const { error } = await supabase.from('entries').update(dbFields).eq('id', id)
+    if (error) console.error('Update error:', error)
+  }
+
   async function deleteEntry(id: string) {
     setEntries(prev => prev.filter(e => e.id !== id))
     const { error } = await supabase.from('entries').delete().eq('id', id)
     if (error) console.error('Delete error:', error)
   }
 
-  return { entries, loading, saveError, addEntry, deleteEntry }
+  return { entries, loading, saveError, addEntry, updateEntry, deleteEntry }
 }

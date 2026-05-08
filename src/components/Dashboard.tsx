@@ -8,9 +8,10 @@ interface Props {
   entries: Entry[];
   onLogEntry: (categoryId?: string) => void;
   onDelete: (id: string) => void;
+  onEdit: (entry: Entry) => void;
 }
 
-export function Dashboard({ entries, onLogEntry, onDelete }: Props) {
+export function Dashboard({ entries, onLogEntry, onDelete, onEdit }: Props) {
   return (
     <main className="max-w-4xl mx-auto px-6 py-7 pb-16">
       <StatStrip entries={entries} />
@@ -32,7 +33,7 @@ export function Dashboard({ entries, onLogEntry, onDelete }: Props) {
       <div className="flex items-center justify-between mb-3.5">
         <h2 className="text-[11px] font-semibold text-muted uppercase tracking-widest">Recent activity</h2>
       </div>
-      <ActivityFeed entries={entries} onDelete={onDelete} />
+      <ActivityFeed entries={entries} onDelete={onDelete} onEdit={onEdit} />
     </main>
   );
 }

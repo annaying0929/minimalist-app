@@ -8,7 +8,7 @@ import { Dashboard } from './components/Dashboard'
 import { History } from './components/History'
 import { LogModal } from './components/LogModal'
 import { Auth } from './components/Auth'
-import type { EntryType } from './types'
+import type { Entry, EntryType } from './types'
 
 type Page = 'dashboard' | 'history'
 
@@ -17,7 +17,8 @@ export default function App() {
   const [page, setPage] = useState<Page>('dashboard')
   const [modalOpen, setModalOpen] = useState(false)
   const [modalCategoryId, setModalCategoryId] = useState<string | undefined>()
-  const { entries, loading, saveError, addEntry, deleteEntry } = useStore(session?.user.id)
+  const [editEntry, setEditEntry] = useState<Entry | undefined>()
+  const { entries, loading, saveError, addEntry, updateEntry, deleteEntry } = useStore(session?.user.id)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
@@ -37,7 +38,13 @@ export default function App() {
   }, [entries])
 
   function openModal(categoryId?: string) {
+    setEditEntry(undefined)
     setModalCategoryId(categoryId)
+    setModalOpen(true)
+  }
+
+  function openEditModal(entry: Entry) {
+    setEditEntry(entry)
     setModalOpen(true)
   }
 
@@ -71,15 +78,17 @@ export default function App() {
       {loading ? (
         <div className="flex items-center justify-center pt-20 text-muted text-sm">Loading entries…</div>
       ) : page === 'dashboard' ? (
-        <Dashboard entries={entries} onLogEntry={openModal} onDelete={deleteEntry} />
+        <Dashboard entries={entries} onLogEntry={openModal} onDelete={deleteEntry} onEdit={openEditModal} />
       ) : (
-        <History entries={entries} onDelete={deleteEntry} />
+        <History entries={entries} onDelete={deleteEntry} onEdit={openEditModal} />
       )}
       <LogModal
         open={modalOpen}
         initialCategoryId={modalCategoryId}
+        editEntry={editEntry}
         onClose={() => setModalOpen(false)}
         onSave={handleSave}
+        onUpdate={(id, fields) => updateEntry(id, fields)}
         debtMap={debtMap}
       />
     </div>

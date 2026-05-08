@@ -5,9 +5,10 @@ import { CATEGORIES } from '../data/categories';
 interface Props {
   entries: Entry[]
   onDelete: (id: string) => void
+  onEdit: (entry: Entry) => void
 }
 
-export function History({ entries, onDelete }: Props) {
+export function History({ entries, onDelete, onEdit }: Props) {
   const [typeFilter, setTypeFilter] = useState<'all' | 'bought' | 'discarded'>('all');
   const [catFilter, setCatFilter] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
@@ -79,7 +80,7 @@ export function History({ entries, onDelete }: Props) {
         </div>
       ) : (
         <div className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
-          <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 px-5 py-2.5 bg-bg border-b border-border text-[11px] font-medium text-muted uppercase tracking-wide">
+          <div className="grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-4 px-5 py-2.5 bg-bg border-b border-border text-[11px] font-medium text-muted uppercase tracking-wide">
             <div></div>
             <div>Item</div>
             <div>Value</div>
@@ -93,7 +94,7 @@ export function History({ entries, onDelete }: Props) {
             return (
               <div
                 key={entry.id}
-                className={`grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 items-center px-5 py-3 ${
+                className={`grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-4 items-center px-5 py-3 ${
                   i < filtered.length - 1 ? 'border-b border-border' : ''
                 } ${confirming ? 'bg-red-50' : ''}`}
               >
@@ -114,6 +115,14 @@ export function History({ entries, onDelete }: Props) {
                   {isBought ? '+' : '−'} £ {entry.estimatedValue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </div>
                 <div className="hidden sm:block text-[12px] text-muted whitespace-nowrap">{formatDate(entry.date)}</div>
+                {!confirming && (
+                  <button
+                    onClick={() => onEdit(entry)}
+                    className="text-[11px] font-medium px-2 py-1 rounded-lg text-muted hover:text-accent hover:bg-accent-lt transition-colors"
+                  >
+                    ✎
+                  </button>
+                )}
                 <button
                   onClick={() => handleDelete(entry.id)}
                   onBlur={() => setConfirmId(null)}

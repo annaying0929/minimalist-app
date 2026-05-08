@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
-import type { EntryType } from '../types';
+import type { Entry, EntryType } from '../types';
 import { CATEGORIES } from '../data/categories';
 
 interface Props {
   open: boolean;
   initialCategoryId?: string;
+  editEntry?: Entry;
   onClose: () => void;
   onSave: (entry: { type: EntryType; categoryId: string; name: string; quantity: number; estimatedValue: number }) => void;
+  onUpdate?: (id: string, fields: { type: EntryType; categoryId: string; name: string; quantity: number; estimatedValue: number }) => void;
   debtMap: Record<string, number>;
 }
 
-export function LogModal({ open, initialCategoryId, onClose, onSave, debtMap }: Props) {
+export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, onUpdate, debtMap }: Props) {
   const [type, setType] = useState<EntryType>('bought');
   const [categoryId, setCategoryId] = useState(initialCategoryId ?? CATEGORIES[0].id);
   const [name, setName] = useState('');
@@ -19,13 +21,21 @@ export function LogModal({ open, initialCategoryId, onClose, onSave, debtMap }: 
 
   useEffect(() => {
     if (open) {
-      setCategoryId(initialCategoryId ?? CATEGORIES[0].id);
-      setName('');
-      setQuantity('1');
-      setValue('');
-      setType('bought');
+      if (editEntry) {
+        setType(editEntry.type);
+        setCategoryId(editEntry.categoryId);
+        setName(editEntry.name);
+        setQuantity(String(editEntry.quantity));
+        setValue(editEntry.estimatedValue > 0 ? String(editEntry.estimatedValue) : '');
+      } else {
+        setCategoryId(initialCategoryId ?? CATEGORIES[0].id);
+        setName('');
+        setQuantity('1');
+        setValue('');
+        setType('bought');
+      }
     }
-  }, [open, initialCategoryId]);
+  }, [open, initialCategoryId, editEntry]);
 
   const debt = debtMap[categoryId] ?? 0;
   const qty = Math.max(1, parseInt(quantity) || 1);
@@ -33,7 +43,12 @@ export function LogModal({ open, initialCategoryId, onClose, onSave, debtMap }: 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
-    onSave({ type, categoryId, name: name.trim(), quantity: Math.max(1, parseInt(quantity) || 1), estimatedValue: parseFloat(value) || 0 });
+    const fields = { type, categoryId, name: name.trim(), quantity: Math.max(1, parseInt(quantity) || 1), estimatedValue: parseFloat(value) || 0 };
+    if (editEntry && onUpdate) {
+      onUpdate(editEntry.id, fields);
+    } else {
+      onSave(fields);
+    }
     onClose();
   }
 
@@ -63,7 +78,7 @@ export function LogModal({ open, initialCategoryId, onClose, onSave, debtMap }: 
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="bg-surface rounded-2xl p-7 w-full max-w-md shadow-2xl animate-[slideUp_0.18s_ease]">
-        <h3 className="text-base font-semibold mb-5">Log an entry</h3>
+        <h3 className="text-base font-semibold mb-5">{editEntry ? 'Edit entry' : 'Log an entry'}</h3>
 
         {/* Toggle */}
         <div className="grid grid-cols-2 bg-bg rounded-lg p-0.5 mb-5">
@@ -151,7 +166,7 @@ export function LogModal({ open, initialCategoryId, onClose, onSave, debtMap }: 
               type="submit"
               className="px-4 py-2 bg-accent text-white rounded-lg text-[13px] font-medium hover:opacity-90 transition-opacity"
             >
-              Save entry
+              {editEntry ? 'Update entry' : 'Save entry'}
             </button>
           </div>
         </form>

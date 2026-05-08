@@ -5,6 +5,7 @@ import { CATEGORIES } from '../data/categories';
 interface Props {
   entries: Entry[]
   onDelete: (id: string) => void
+  onEdit: (entry: Entry) => void
 }
 
 function relativeDate(iso: string) {
@@ -17,7 +18,7 @@ function relativeDate(iso: string) {
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
-export function ActivityFeed({ entries, onDelete }: Props) {
+export function ActivityFeed({ entries, onDelete, onEdit }: Props) {
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const recent = entries.slice(0, 10);
 
@@ -65,6 +66,14 @@ export function ActivityFeed({ entries, onDelete }: Props) {
               </div>
               <div className="text-[11px] text-muted mt-0.5">{relativeDate(entry.date)}</div>
             </div>
+            {!confirming && (
+              <button
+                onClick={() => onEdit(entry)}
+                className="text-[11px] font-medium px-2 py-1 rounded-lg text-muted hover:text-accent hover:bg-accent-lt transition-colors flex-shrink-0"
+              >
+                ✎
+              </button>
+            )}
             <button
               onClick={() => handleDelete(entry.id)}
               onBlur={() => setConfirmId(null)}
