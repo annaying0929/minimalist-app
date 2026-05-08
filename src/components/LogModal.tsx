@@ -148,14 +148,11 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
           <div>
             <label className="block text-[11px] font-medium text-muted uppercase tracking-wide mb-1.5">Category</label>
             <div className="relative">
-              {selectedCat && (
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base pointer-events-none">{selectedCat.icon}</span>
-              )}
               <select
                 required
                 value={categoryId}
                 onChange={e => setCategoryId(e.target.value)}
-                className={`w-full py-2.5 pr-3 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent focus:bg-white transition-colors appearance-none ${selectedCat ? 'pl-9' : 'pl-3'}`}
+                className="w-full px-3 py-2.5 pr-8 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent focus:bg-white transition-colors appearance-none"
               >
                 <option value="" disabled>Select a category…</option>
                 {categories.map(c => (
