@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import type { Category, Entry } from '../types';
 import { StatStrip } from './StatStrip';
 import { CategoryCard } from './CategoryCard';
@@ -12,6 +13,16 @@ interface Props {
 }
 
 export function Dashboard({ entries, categories, onLogEntry, onDelete, onEdit }: Props) {
+  const sortedCategories = useMemo(() => {
+    const discardCount: Record<string, number> = {};
+    for (const e of entries) {
+      if (e.type === 'discarded') {
+        discardCount[e.categoryId] = (discardCount[e.categoryId] ?? 0) + e.quantity;
+      }
+    }
+    return [...categories].sort((a, b) => (discardCount[b.id] ?? 0) - (discardCount[a.id] ?? 0));
+  }, [entries, categories]);
+
   return (
     <main className="max-w-4xl mx-auto px-6 py-7 pb-16">
       <StatStrip entries={entries} />
@@ -20,7 +31,7 @@ export function Dashboard({ entries, categories, onLogEntry, onDelete, onEdit }:
         <h2 className="text-[11px] font-semibold text-muted uppercase tracking-widest">Categories</h2>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
-        {categories.map(cat => (
+        {sortedCategories.map(cat => (
           <CategoryCard
             key={cat.id}
             category={cat}
