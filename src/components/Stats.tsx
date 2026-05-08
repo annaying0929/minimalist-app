@@ -54,14 +54,14 @@ export function Stats({ entries, categories, onLogEntry }: Props) {
   }, [entries])
 
   const badges: Badge[] = [
-    { id: 'first', icon: '🌱', label: 'First step', description: 'Log your first discard', unlocked: totalDiscarded >= 1 },
-    { id: 'ten', icon: '⭐', label: 'Getting lighter', description: 'Discard 10 items', unlocked: totalDiscarded >= 10 },
-    { id: 'twenty', icon: '🌟', label: 'On a roll', description: 'Discard 20 items', unlocked: totalDiscarded >= 20 },
-    { id: 'fifty', icon: '💫', label: 'Minimalist', description: 'Discard 50 items', unlocked: totalDiscarded >= 50 },
-    { id: 'hundred', icon: '🏆', label: 'Champion', description: 'Discard 100 items', unlocked: totalDiscarded >= 100 },
-    { id: 'cat1', icon: '✨', label: 'Balanced', description: 'Clear your first category', unlocked: clearedCategories >= 1 },
-    { id: 'cat5', icon: '🎯', label: 'Focused', description: 'Clear 5 categories', unlocked: clearedCategories >= 5 },
-    { id: 'catall', icon: '👑', label: 'All clear', description: 'Every category balanced', unlocked: clearedCategories >= categories.length && categories.length > 0 },
+    { id: 'first', icon: '🍃', label: 'First step', description: 'Log your first discard', unlocked: totalDiscarded >= 1 },
+    { id: 'ten', icon: '🌿', label: 'Getting lighter', description: 'Discard 10 items', unlocked: totalDiscarded >= 10 },
+    { id: 'twenty', icon: '🪴', label: 'On a roll', description: 'Discard 20 items', unlocked: totalDiscarded >= 20 },
+    { id: 'fifty', icon: '🌲', label: 'Minimalist', description: 'Discard 50 items', unlocked: totalDiscarded >= 50 },
+    { id: 'hundred', icon: '🏡', label: 'Champion', description: 'Discard 100 items', unlocked: totalDiscarded >= 100 },
+    { id: 'cat1', icon: '⚖️', label: 'Balanced', description: 'Clear your first category', unlocked: clearedCategories >= 1 },
+    { id: 'cat5', icon: '🎋', label: 'Focused', description: 'Clear 5 categories', unlocked: clearedCategories >= 5 },
+    { id: 'catall', icon: '🌳', label: 'All clear', description: 'Every category balanced', unlocked: clearedCategories >= categories.length && categories.length > 0 },
   ]
 
   const sortedCategories = useMemo(() => {
