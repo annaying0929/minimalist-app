@@ -132,7 +132,7 @@ export function CategorySettings({ onBack }: Props) {
   }
 
   return (
-    <main className="max-w-4xl mx-auto px-6 py-7 pb-16">
+    <main className="max-w-4xl mx-auto px-6 py-7 pb-28">
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={onBack}

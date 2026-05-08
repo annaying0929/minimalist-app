@@ -1,18 +1,21 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
 import { useStore } from './hooks/useStore'
 import { useCategories } from './context/CategoryContext'
 import { Nav } from './components/Nav'
+import { BottomNav } from './components/BottomNav'
 import { Dashboard } from './components/Dashboard'
 import { History } from './components/History'
+import { Stats } from './components/Stats'
 import { CategorySettings } from './components/CategorySettings'
 import { LogModal } from './components/LogModal'
 import { CelebrationModal } from './components/CelebrationModal'
+import { DebtFreeBanner } from './components/DebtFreeBanner'
 import { Auth } from './components/Auth'
 import type { Entry, EntryType } from './types'
 
-type Page = 'dashboard' | 'history' | 'categories'
+type Page = 'dashboard' | 'history' | 'stats' | 'categories'
 
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
@@ -22,8 +25,11 @@ export default function App() {
   const [editEntry, setEditEntry] = useState<Entry | undefined>()
   const [celebrationEntry, setCelebrationEntry] = useState<Entry | null>(null)
   const [celebrationDebt, setCelebrationDebt] = useState(0)
+  const [debtFreeSeen, setDebtFreeSeen] = useState(false)
   const { entries, loading, saveError, addEntry, updateEntry, deleteEntry } = useStore(session?.user.id)
   const { categories, deleteCategory } = useCategories()
+
+  const prevDebtFreeRef = useRef(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
@@ -40,6 +46,20 @@ export default function App() {
     }
     return map
   }, [entries])
+
+  const isDebtFree = useMemo(() => {
+    if (entries.length === 0) return false
+    return categories.every(cat => (debtMap[cat.id] ?? 0) <= 0)
+  }, [entries, categories, debtMap])
+
+  // Show debt-free banner when it transitions to true (not on first load)
+  const [showDebtFree, setShowDebtFree] = useState(false)
+  useEffect(() => {
+    if (isDebtFree && prevDebtFreeRef.current === false && entries.length > 0 && !debtFreeSeen) {
+      setShowDebtFree(true)
+    }
+    prevDebtFreeRef.current = isDebtFree
+  }, [isDebtFree, entries.length, debtFreeSeen])
 
   function openModal(categoryId?: string) {
     setEditEntry(undefined)
@@ -74,12 +94,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-bg font-sans">
-      <Nav
-        page={page}
-        onPageChange={setPage}
-        onLogEntry={() => openModal()}
-        onSignOut={() => supabase.auth.signOut()}
-      />
+      <Nav onSignOut={() => supabase.auth.signOut()} />
       {saveError && (
         <div className="bg-warn-lt border-b border-warn/20 text-warn text-[12px] text-center py-2 px-4">
           {saveError} — check your internet connection and try again.
@@ -91,14 +106,22 @@ export default function App() {
         <Dashboard entries={entries} onLogEntry={openModal} onDelete={deleteEntry} onEdit={openEditModal} categories={categories} />
       ) : page === 'history' ? (
         <History entries={entries} onDelete={deleteEntry} onEdit={openEditModal} />
+      ) : page === 'stats' ? (
+        <Stats entries={entries} />
       ) : (
         <CategorySettings onBack={() => setPage('dashboard')} />
       )}
+
+      <BottomNav page={page} onPageChange={setPage} onLogEntry={() => openModal()} />
+
       <CelebrationModal
         entry={celebrationEntry}
         debtAfter={celebrationDebt}
         onClose={() => setCelebrationEntry(null)}
       />
+      {showDebtFree && (
+        <DebtFreeBanner onClose={() => { setShowDebtFree(false); setDebtFreeSeen(true) }} />
+      )}
       <LogModal
         open={modalOpen}
         initialCategoryId={modalCategoryId}

@@ -27,7 +27,7 @@ export function Dashboard({ entries, categories, onLogEntry, onDelete, onEdit }:
   }, [entries, categories]);
 
   return (
-    <main className="max-w-4xl mx-auto px-6 py-7 pb-16">
+    <main className="max-w-4xl mx-auto px-6 py-7 pb-28">
       <StatStrip entries={entries} />
 
       <div className="flex items-center justify-between mb-3.5">

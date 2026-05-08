@@ -38,7 +38,7 @@ export function History({ entries, onDelete, onEdit }: Props) {
   }
 
   return (
-    <main className="max-w-4xl mx-auto px-6 py-7 pb-16">
+    <main className="max-w-4xl mx-auto px-6 py-7 pb-28">
       <div className="flex flex-wrap gap-2 mb-5">
         {(['all', 'bought', 'discarded'] as const).map(f => (
           <button
