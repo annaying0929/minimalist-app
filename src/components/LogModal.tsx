@@ -14,25 +14,26 @@ export function LogModal({ open, initialCategoryId, onClose, onSave, debtMap }: 
   const [type, setType] = useState<EntryType>('bought');
   const [categoryId, setCategoryId] = useState(initialCategoryId ?? CATEGORIES[0].id);
   const [name, setName] = useState('');
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState('1');
   const [value, setValue] = useState('');
 
   useEffect(() => {
     if (open) {
       setCategoryId(initialCategoryId ?? CATEGORIES[0].id);
       setName('');
-      setQuantity(1);
+      setQuantity('1');
       setValue('');
       setType('bought');
     }
   }, [open, initialCategoryId]);
 
   const debt = debtMap[categoryId] ?? 0;
+  const qty = Math.max(1, parseInt(quantity) || 1);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
-    onSave({ type, categoryId, name: name.trim(), quantity, estimatedValue: parseFloat(value) || 0 });
+    onSave({ type, categoryId, name: name.trim(), quantity: Math.max(1, parseInt(quantity) || 1), estimatedValue: parseFloat(value) || 0 });
     onClose();
   }
 
@@ -40,14 +41,14 @@ export function LogModal({ open, initialCategoryId, onClose, onSave, debtMap }: 
 
   const notice = () => {
     if (type === 'bought') {
-      const after = debt + quantity;
+      const after = debt + qty;
       if (debt > 0) {
         return { text: `${CATEGORIES.find(c => c.id === categoryId)?.name} already has ${debt} pending discard${debt > 1 ? 's' : ''}. After this you'll owe ${after} item${after > 1 ? 's' : ''}.`, style: 'bg-warn-lt border-warn/30 text-warn' };
       }
-      return { text: `${CATEGORIES.find(c => c.id === categoryId)?.name} is clear. This purchase will require ${quantity} discard${quantity > 1 ? 's' : ''}.`, style: 'bg-accent-lt border-accent/30 text-accent' };
+      return { text: `${CATEGORIES.find(c => c.id === categoryId)?.name} is clear. This purchase will require ${qty} discard${qty > 1 ? 's' : ''}.`, style: 'bg-accent-lt border-accent/30 text-accent' };
     } else {
       if (debt > 0) {
-        const after = Math.max(0, debt - quantity);
+        const after = Math.max(0, debt - qty);
         return { text: `This will reduce the ${CATEGORIES.find(c => c.id === categoryId)?.name} debt to ${after} item${after !== 1 ? 's' : ''}.`, style: 'bg-accent-lt border-accent/30 text-accent' };
       }
       return null;
@@ -119,7 +120,8 @@ export function LogModal({ open, initialCategoryId, onClose, onSave, debtMap }: 
                 type="number"
                 min={1}
                 value={quantity}
-                onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={e => setQuantity(e.target.value)}
+                onBlur={e => { if (!e.target.value || parseInt(e.target.value) < 1) setQuantity('1'); }}
                 className="w-full px-3 py-2.5 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent focus:bg-white transition-colors"
               />
             </div>
