@@ -16,7 +16,7 @@ interface Props {
 export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, onUpdate, onDeleteCategory, debtMap }: Props) {
   const { categories } = useCategories();
   const [type, setType] = useState<EntryType>('bought');
-  const [categoryName, setCategoryName] = useState('');
+  const [categoryId, setCategoryId] = useState('');
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [value, setValue] = useState('');
@@ -27,14 +27,12 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
       setConfirmDelete(false);
       if (editEntry) {
         setType(editEntry.type);
-        const cat = categories.find(c => c.id === editEntry.categoryId);
-        setCategoryName(cat?.name ?? editEntry.categoryId);
+        setCategoryId(editEntry.categoryId);
         setName(editEntry.name);
         setQuantity(String(editEntry.quantity));
         setValue(editEntry.estimatedValue > 0 ? String(editEntry.estimatedValue) : '');
       } else {
-        const initCat = initialCategoryId ? categories.find(c => c.id === initialCategoryId) : null;
-        setCategoryName(initCat?.name ?? '');
+        setCategoryId(initialCategoryId ?? categories[0]?.id ?? '');
         setName('');
         setQuantity('1');
         setValue('');
@@ -43,17 +41,16 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
     }
   }, [open, initialCategoryId, editEntry]);
 
-  const matchedCat = categories.find(c => c.name.toLowerCase() === categoryName.trim().toLowerCase());
-  const resolvedId = matchedCat?.id ?? '';
-  const debt = debtMap[resolvedId] ?? 0;
+  const selectedCat = categories.find(c => c.id === categoryId);
+  const debt = debtMap[categoryId] ?? 0;
   const qty = Math.max(1, parseInt(quantity) || 1);
 
   const showDeleteBtn = !!initialCategoryId && !editEntry && !!onDeleteCategory;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !matchedCat) return;
-    const fields = { type, categoryId: matchedCat.id, name: name.trim(), quantity: Math.max(1, parseInt(quantity) || 1), estimatedValue: parseFloat(value) || 0 };
+    if (!name.trim() || !categoryId) return;
+    const fields = { type, categoryId, name: name.trim(), quantity: Math.max(1, parseInt(quantity) || 1), estimatedValue: parseFloat(value) || 0 };
     if (editEntry && onUpdate) {
       onUpdate(editEntry.id, fields);
     } else {
@@ -65,17 +62,17 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
   if (!open) return null;
 
   const notice = () => {
-    if (!matchedCat) return null;
+    if (!selectedCat) return null;
     if (type === 'bought') {
       const after = debt + qty;
       if (debt > 0) {
-        return { text: `${matchedCat.name} already has ${debt} pending discard${debt > 1 ? 's' : ''}. After this you'll owe ${after} item${after > 1 ? 's' : ''}.`, style: 'bg-warn-lt border-warn/30 text-warn' };
+        return { text: `${selectedCat.name} already has ${debt} pending discard${debt > 1 ? 's' : ''}. After this you'll owe ${after} item${after > 1 ? 's' : ''}.`, style: 'bg-warn-lt border-warn/30 text-warn' };
       }
-      return { text: `${matchedCat.name} is clear. This purchase will require ${qty} discard${qty > 1 ? 's' : ''}.`, style: 'bg-accent-lt border-accent/30 text-accent' };
+      return { text: `${selectedCat.name} is clear. This purchase will require ${qty} discard${qty > 1 ? 's' : ''}.`, style: 'bg-accent-lt border-accent/30 text-accent' };
     } else {
       if (debt > 0) {
         const after = Math.max(0, debt - qty);
-        return { text: `This will reduce the ${matchedCat.name} debt to ${after} item${after !== 1 ? 's' : ''}.`, style: 'bg-accent-lt border-accent/30 text-accent' };
+        return { text: `This will reduce the ${selectedCat.name} debt to ${after} item${after !== 1 ? 's' : ''}.`, style: 'bg-accent-lt border-accent/30 text-accent' };
       }
       return null;
     }
@@ -149,6 +146,27 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
 
         <form onSubmit={handleSubmit} className="space-y-3.5">
           <div>
+            <label className="block text-[11px] font-medium text-muted uppercase tracking-wide mb-1.5">Category</label>
+            <div className="relative">
+              {selectedCat && (
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base pointer-events-none">{selectedCat.icon}</span>
+              )}
+              <select
+                required
+                value={categoryId}
+                onChange={e => setCategoryId(e.target.value)}
+                className={`w-full py-2.5 pr-3 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent focus:bg-white transition-colors appearance-none ${selectedCat ? 'pl-9' : 'pl-3'}`}
+              >
+                <option value="" disabled>Select a category…</option>
+                {categories.map(c => (
+                  <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
+                ))}
+              </select>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none text-[10px]">▾</span>
+            </div>
+          </div>
+
+          <div>
             <label className="block text-[11px] font-medium text-muted uppercase tracking-wide mb-1.5">Item name</label>
             <input
               required
@@ -157,33 +175,6 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
               placeholder="e.g. Winter coat, Baby grows ×3…"
               className="w-full px-3 py-2.5 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent focus:bg-white transition-colors"
             />
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-medium text-muted uppercase tracking-wide mb-1.5">Category</label>
-            <input
-              required
-              value={categoryName}
-              onChange={e => setCategoryName(e.target.value)}
-              placeholder="Type a category name…"
-              autoComplete="off"
-              list="category-list"
-              className="w-full px-3 py-2.5 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent focus:bg-white transition-colors"
-            />
-            <datalist id="category-list">
-              {categories.map(c => (
-                <option key={c.id} value={c.name} />
-              ))}
-            </datalist>
-            {matchedCat && (
-              <div className="mt-1.5 flex items-center gap-1.5">
-                <span className="text-base leading-none">{matchedCat.icon}</span>
-                <span className="text-[11px] text-muted">{matchedCat.name}</span>
-              </div>
-            )}
-            {categoryName.trim() && !matchedCat && (
-              <p className="mt-1.5 text-[11px] text-warn">No matching category — add one from the dashboard first.</p>
-            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
