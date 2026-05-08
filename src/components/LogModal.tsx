@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Entry, EntryType } from '../types';
 import { useCategories } from '../context/CategoryContext';
 
@@ -13,23 +13,27 @@ interface Props {
 }
 
 export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, onUpdate, debtMap }: Props) {
-  const { categories } = useCategories();
+  const { categories, addCategory } = useCategories();
   const [type, setType] = useState<EntryType>('bought');
-  const [categoryId, setCategoryId] = useState(initialCategoryId ?? categories[0]?.id ?? '');
+  const [categoryName, setCategoryName] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [value, setValue] = useState('');
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (open) {
       if (editEntry) {
         setType(editEntry.type);
-        setCategoryId(editEntry.categoryId);
+        const cat = categories.find(c => c.id === editEntry.categoryId);
+        setCategoryName(cat?.name ?? editEntry.categoryId);
         setName(editEntry.name);
         setQuantity(String(editEntry.quantity));
         setValue(editEntry.estimatedValue > 0 ? String(editEntry.estimatedValue) : '');
       } else {
-        setCategoryId(initialCategoryId ?? categories[0]?.id ?? '');
+        const initCat = initialCategoryId ? categories.find(c => c.id === initialCategoryId) : null;
+        setCategoryName(initCat?.name ?? '');
         setName('');
         setQuantity('1');
         setValue('');
@@ -38,13 +42,28 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
     }
   }, [open, initialCategoryId, editEntry]);
 
-  const debt = debtMap[categoryId] ?? 0;
+  const matchedCat = categories.find(c => c.name.toLowerCase() === categoryName.trim().toLowerCase());
+  const isNew = categoryName.trim().length > 0 && !matchedCat;
+  const resolvedId = matchedCat?.id ?? '';
+  const debt = debtMap[resolvedId] ?? 0;
   const qty = Math.max(1, parseInt(quantity) || 1);
+
+  const suggestions = categoryName.trim()
+    ? categories.filter(c => c.name.toLowerCase().includes(categoryName.trim().toLowerCase()))
+    : categories;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) return;
-    const fields = { type, categoryId, name: name.trim(), quantity: Math.max(1, parseInt(quantity) || 1), estimatedValue: parseFloat(value) || 0 };
+    if (!name.trim() || !categoryName.trim()) return;
+
+    let catId: string;
+    if (matchedCat) {
+      catId = matchedCat.id;
+    } else {
+      catId = addCategory(categoryName.trim(), '📦');
+    }
+
+    const fields = { type, categoryId: catId, name: name.trim(), quantity: Math.max(1, parseInt(quantity) || 1), estimatedValue: parseFloat(value) || 0 };
     if (editEntry && onUpdate) {
       onUpdate(editEntry.id, fields);
     } else {
@@ -56,16 +75,17 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
   if (!open) return null;
 
   const notice = () => {
+    if (!matchedCat) return null;
     if (type === 'bought') {
       const after = debt + qty;
       if (debt > 0) {
-        return { text: `${categories.find(c => c.id === categoryId)?.name} already has ${debt} pending discard${debt > 1 ? 's' : ''}. After this you'll owe ${after} item${after > 1 ? 's' : ''}.`, style: 'bg-warn-lt border-warn/30 text-warn' };
+        return { text: `${matchedCat.name} already has ${debt} pending discard${debt > 1 ? 's' : ''}. After this you'll owe ${after} item${after > 1 ? 's' : ''}.`, style: 'bg-warn-lt border-warn/30 text-warn' };
       }
-      return { text: `${categories.find(c => c.id === categoryId)?.name} is clear. This purchase will require ${qty} discard${qty > 1 ? 's' : ''}.`, style: 'bg-accent-lt border-accent/30 text-accent' };
+      return { text: `${matchedCat.name} is clear. This purchase will require ${qty} discard${qty > 1 ? 's' : ''}.`, style: 'bg-accent-lt border-accent/30 text-accent' };
     } else {
       if (debt > 0) {
         const after = Math.max(0, debt - qty);
-        return { text: `This will reduce the ${categories.find(c => c.id === categoryId)?.name} debt to ${after} item${after !== 1 ? 's' : ''}.`, style: 'bg-accent-lt border-accent/30 text-accent' };
+        return { text: `This will reduce the ${matchedCat.name} debt to ${after} item${after !== 1 ? 's' : ''}.`, style: 'bg-accent-lt border-accent/30 text-accent' };
       }
       return null;
     }
@@ -116,17 +136,44 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
             />
           </div>
 
-          <div>
-            <label className="block text-[11px] font-medium text-muted uppercase tracking-wide mb-1.5">Category</label>
-            <select
-              value={categoryId}
-              onChange={e => setCategoryId(e.target.value)}
-              className="w-full px-3 py-2.5 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent focus:bg-white transition-colors"
-            >
-              {categories.map(c => (
-                <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
-              ))}
-            </select>
+          <div className="relative">
+            <label className="block text-[11px] font-medium text-muted uppercase tracking-wide mb-1.5">
+              Category
+              {isNew && <span className="ml-2 text-accent normal-case font-normal">— will be created</span>}
+            </label>
+            <input
+              required
+              value={categoryName}
+              onChange={e => { setCategoryName(e.target.value); setShowSuggestions(true); }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => { hideTimer.current = setTimeout(() => setShowSuggestions(false), 150); }}
+              placeholder="Type or pick a category…"
+              autoComplete="off"
+              className={`w-full px-3 py-2.5 border rounded-lg text-[13px] bg-bg focus:outline-none transition-colors focus:bg-white ${
+                isNew ? 'border-accent' : 'border-border focus:border-accent'
+              }`}
+            />
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute z-10 left-0 right-0 top-full mt-1 bg-surface border border-border rounded-lg shadow-lg overflow-hidden max-h-48 overflow-y-auto">
+                {suggestions.map(c => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onMouseDown={() => {
+                      if (hideTimer.current) clearTimeout(hideTimer.current);
+                      setCategoryName(c.name);
+                      setShowSuggestions(false);
+                    }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-[13px] text-left hover:bg-bg transition-colors ${
+                      matchedCat?.id === c.id ? 'bg-accent-lt text-accent font-medium' : ''
+                    }`}
+                  >
+                    <span>{c.icon}</span>
+                    <span>{c.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">

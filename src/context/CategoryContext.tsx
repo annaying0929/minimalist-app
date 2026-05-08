@@ -23,7 +23,7 @@ interface ContextValue {
   categories: Category[]
   builtinIds: Set<string>
   updateCategory: (id: string, name: string, icon: string) => void
-  addCategory: (name: string, icon: string) => void
+  addCategory: (name: string, icon: string) => string
   deleteCategory: (id: string) => void
 }
 
@@ -54,6 +54,7 @@ export function CategoryProvider({ children }: { children: React.ReactNode }) {
       addCategory(name, icon) {
         const id = `custom-${crypto.randomUUID()}`
         update({ ...store, custom: [...store.custom, { id, name, icon }] })
+        return id
       },
       deleteCategory(id) {
         update({ ...store, custom: store.custom.filter(c => c.id !== id) })
