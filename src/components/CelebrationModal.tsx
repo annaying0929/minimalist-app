@@ -32,7 +32,7 @@ export function CelebrationModal({ entry, debtAfter, onClose }: Props) {
         {isDonated ? (
           <>
             <div className="flex justify-center gap-1 text-3xl mb-1 animate-[slideUp_0.3s_ease]">
-              <span>💚</span><span>🌟</span><span>💚</span>
+              <span>🎁</span><span>💝</span><span>🎁</span>
             </div>
             <div className="flex justify-center gap-2 text-xl mb-5">
               <span>✨</span><span>✨</span><span>✨</span>
@@ -43,7 +43,7 @@ export function CelebrationModal({ entry, debtAfter, onClose }: Props) {
         ) : (
           <>
             <div className="flex justify-center gap-1 text-3xl mb-1 animate-[slideUp_0.3s_ease]">
-              <span>⭐</span><span>🌟</span><span>⭐</span>
+              <span>🍃</span><span>🌿</span><span>🍃</span>
             </div>
             <div className="flex justify-center gap-2 text-xl mb-5">
               <span>✨</span><span>✨</span><span>✨</span>
