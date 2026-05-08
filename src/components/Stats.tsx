@@ -65,11 +65,13 @@ export function Stats({ entries, categories, onLogEntry }: Props) {
   ]
 
   const sortedCategories = useMemo(() => {
-    const debtMap: Record<string, number> = {}
+    const discardCount: Record<string, number> = {}
     for (const e of entries) {
-      debtMap[e.categoryId] = (debtMap[e.categoryId] ?? 0) + (e.type === 'bought' ? e.quantity : -e.quantity)
+      if (e.type === 'discarded') {
+        discardCount[e.categoryId] = (discardCount[e.categoryId] ?? 0) + e.quantity
+      }
     }
-    return [...categories].sort((a, b) => (debtMap[b.id] ?? 0) - (debtMap[a.id] ?? 0))
+    return [...categories].sort((a, b) => (discardCount[b.id] ?? 0) - (discardCount[a.id] ?? 0))
   }, [entries, categories])
 
   return (
