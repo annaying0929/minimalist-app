@@ -28,7 +28,7 @@ export function CelebrationModal({ entry, debtAfter, onClose }: Props) {
         className="bg-surface rounded-2xl p-10 w-full max-w-sm shadow-2xl text-center animate-[slideUp_0.22s_ease]"
         onClick={e => e.stopPropagation()}
       >
-        <div className="text-5xl mb-6">{isDonated ? '🎁' : '🍃'}</div>
+        <div className="text-5xl mb-6">{isDonated ? '💚' : '🍃'}</div>
 
         <h2 className="text-[24px] font-semibold text-[#1C1C1A] mb-2">
           {isDonated ? 'It found a new home.' : 'One less thing.'}
