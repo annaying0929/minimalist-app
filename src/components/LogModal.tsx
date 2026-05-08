@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import type { Entry, EntryType } from '../types';
 import { useCategories } from '../context/CategoryContext';
 
@@ -16,11 +16,9 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
   const { categories, addCategory } = useCategories();
   const [type, setType] = useState<EntryType>('bought');
   const [categoryName, setCategoryName] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [value, setValue] = useState('');
-  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -47,10 +45,6 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
   const resolvedId = matchedCat?.id ?? '';
   const debt = debtMap[resolvedId] ?? 0;
   const qty = Math.max(1, parseInt(quantity) || 1);
-
-  const suggestions = categoryName.trim()
-    ? categories.filter(c => c.name.toLowerCase().includes(categoryName.trim().toLowerCase()))
-    : categories;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -136,42 +130,36 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
             />
           </div>
 
-          <div className="relative">
-            <label className="block text-[11px] font-medium text-muted uppercase tracking-wide mb-1.5">
-              Category
-              {isNew && <span className="ml-2 text-accent normal-case font-normal">— will be created</span>}
-            </label>
+          <div>
+            <label className="block text-[11px] font-medium text-muted uppercase tracking-wide mb-1.5">Category</label>
             <input
               required
               value={categoryName}
-              onChange={e => { setCategoryName(e.target.value); setShowSuggestions(true); }}
-              onFocus={() => setShowSuggestions(true)}
-              onBlur={() => { hideTimer.current = setTimeout(() => setShowSuggestions(false), 150); }}
-              placeholder="Type or pick a category…"
+              onChange={e => setCategoryName(e.target.value)}
+              placeholder="Type a category name…"
               autoComplete="off"
-              className={`w-full px-3 py-2.5 border rounded-lg text-[13px] bg-bg focus:outline-none transition-colors focus:bg-white ${
-                isNew ? 'border-accent' : 'border-border focus:border-accent'
+              list="category-list"
+              className={`w-full px-3 py-2.5 border rounded-lg text-[13px] bg-bg focus:outline-none focus:bg-white transition-colors ${
+                isNew ? 'border-accent focus:border-accent' : 'border-border focus:border-accent'
               }`}
             />
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute z-10 left-0 right-0 top-full mt-1 bg-surface border border-border rounded-lg shadow-lg overflow-hidden max-h-48 overflow-y-auto">
-                {suggestions.map(c => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onMouseDown={() => {
-                      if (hideTimer.current) clearTimeout(hideTimer.current);
-                      setCategoryName(c.name);
-                      setShowSuggestions(false);
-                    }}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-[13px] text-left hover:bg-bg transition-colors ${
-                      matchedCat?.id === c.id ? 'bg-accent-lt text-accent font-medium' : ''
-                    }`}
-                  >
-                    <span>{c.icon}</span>
-                    <span>{c.name}</span>
-                  </button>
-                ))}
+            <datalist id="category-list">
+              {categories.map(c => (
+                <option key={c.id} value={c.name} />
+              ))}
+            </datalist>
+            {isNew && (
+              <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-accent-lt border border-accent/30 rounded-lg">
+                <span className="text-lg">📦</span>
+                <span className="text-[12px] text-accent font-medium">
+                  New category "<strong>{categoryName.trim()}</strong>" will be created
+                </span>
+              </div>
+            )}
+            {matchedCat && (
+              <div className="mt-1.5 flex items-center gap-1.5">
+                <span className="text-base leading-none">{matchedCat.icon}</span>
+                <span className="text-[11px] text-muted">{matchedCat.name}</span>
               </div>
             )}
           </div>
