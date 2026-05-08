@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useCategories } from '../context/CategoryContext'
 import { IconPicker } from './IconPicker'
 
+
 const BG_COLORS = [
   { name: 'Warm White',    value: '#F7F6F3' },
   { name: 'Dusty Pink',    value: '#FAF0F0' },
@@ -27,7 +28,7 @@ function applyBg(value: string) {
 interface Props { onBack: () => void }
 
 export function CategorySettings({ onBack }: Props) {
-  const { categories, builtinIds, updateCategory, addCategory, deleteCategory } = useCategories()
+  const { categories, deletedCategories, builtinIds, updateCategory, addCategory, deleteCategory, restoreCategory } = useCategories()
   const [activeBg, setActiveBg] = useState(getActiveBg)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
@@ -153,6 +154,30 @@ export function CategorySettings({ onBack }: Props) {
           )
         })}
       </div>
+
+      {deletedCategories.length > 0 && (
+        <div className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden mb-6">
+          <div className="px-4 py-3 border-b border-border">
+            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-widest">Deleted categories</h3>
+            <p className="text-[11px] text-muted mt-0.5">Your history is safe — restore to bring them back</p>
+          </div>
+          {deletedCategories.map((cat, i) => (
+            <div
+              key={cat.id}
+              className={`flex items-center gap-3 px-4 py-3 opacity-60 ${i < deletedCategories.length - 1 ? 'border-b border-border' : ''}`}
+            >
+              <span className="text-xl w-8 text-center flex-shrink-0">{cat.icon}</span>
+              <span className="flex-1 text-[13px] font-medium">{cat.name}</span>
+              <button
+                onClick={() => restoreCategory(cat.id)}
+                className="text-[12px] font-medium px-3 py-1.5 rounded-lg text-accent bg-accent-lt hover:opacity-80 transition-opacity whitespace-nowrap"
+              >
+                Restore
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="bg-surface border border-border rounded-xl shadow-sm p-4">
         <h3 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-3">Add category</h3>
