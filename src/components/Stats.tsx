@@ -16,16 +16,6 @@ interface Badge {
   unlocked: boolean
 }
 
-function getMonthKey(iso: string) {
-  const d = new Date(iso)
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-}
-
-function monthLabel(key: string) {
-  const [y, m] = key.split('-')
-  return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('en-GB', { month: 'short' })
-}
-
 function fmt(n: number) {
   return `£ ${n.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
 }
@@ -66,30 +56,6 @@ export function Stats({ entries, categories, onLogEntry }: Props) {
     { id: 'cat5', icon: '🎯', label: 'Focused', description: 'Clear 5 categories', unlocked: clearedCategories >= 5 },
     { id: 'catall', icon: '👑', label: 'All clear', description: 'Every category balanced', unlocked: clearedCategories >= categories.length && categories.length > 0 },
   ]
-
-  // Monthly chart — last 6 months
-  const chartData = useMemo(() => {
-    const now = new Date()
-    const months: string[] = []
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
-    }
-    const bought: Record<string, number> = {}
-    const discarded: Record<string, number> = {}
-    for (const e of entries) {
-      const k = getMonthKey(e.date)
-      if (e.type === 'bought') bought[k] = (bought[k] ?? 0) + e.quantity
-      else discarded[k] = (discarded[k] ?? 0) + e.quantity
-    }
-    return months.map(m => ({
-      label: monthLabel(m),
-      bought: bought[m] ?? 0,
-      discarded: discarded[m] ?? 0,
-    }))
-  }, [entries])
-
-  const maxVal = Math.max(...chartData.flatMap(d => [d.bought, d.discarded]), 1)
 
   const sortedCategories = useMemo(() => {
     const debtMap: Record<string, number> = {}
@@ -134,38 +100,6 @@ export function Stats({ entries, categories, onLogEntry }: Props) {
           <span className="text-2xl font-light leading-none">+</span>
           <span className="text-[12px] font-medium">Add category</span>
         </button>
-      </div>
-
-      {/* Monthly chart */}
-      <h2 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-3">Monthly snapshot</h2>
-      <div className="bg-surface border border-border rounded-xl shadow-sm p-5 mb-7">
-        <div className="flex items-end justify-between gap-2" style={{ height: 120 }}>
-          {chartData.map((d, i) => (
-            <div key={i} className="flex-1 flex flex-col items-center gap-1">
-              <div className="w-full flex items-end gap-0.5" style={{ height: 96 }}>
-                <div
-                  className="flex-1 rounded-t-sm bg-warn/70 transition-all"
-                  style={{ height: `${(d.bought / maxVal) * 96}px`, minHeight: d.bought > 0 ? 2 : 0 }}
-                />
-                <div
-                  className="flex-1 rounded-t-sm bg-accent/70 transition-all"
-                  style={{ height: `${(d.discarded / maxVal) * 96}px`, minHeight: d.discarded > 0 ? 2 : 0 }}
-                />
-              </div>
-              <span className="text-[10px] text-muted">{d.label}</span>
-            </div>
-          ))}
-        </div>
-        <div className="flex items-center gap-4 mt-3 justify-center">
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-warn/70" />
-            <span className="text-[11px] text-muted">Bought</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-accent/70" />
-            <span className="text-[11px] text-muted">Discarded</span>
-          </div>
-        </div>
       </div>
 
       {/* Achievements */}

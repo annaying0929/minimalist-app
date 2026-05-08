@@ -7,6 +7,7 @@ import { Nav } from './components/Nav'
 import { BottomNav } from './components/BottomNav'
 import { History } from './components/History'
 import { Stats } from './components/Stats'
+import { Trends } from './components/Trends'
 import { CategorySettings } from './components/CategorySettings'
 import { LogModal } from './components/LogModal'
 import { CelebrationModal } from './components/CelebrationModal'
@@ -14,7 +15,7 @@ import { DebtFreeBanner } from './components/DebtFreeBanner'
 import { Auth } from './components/Auth'
 import type { Entry, EntryType } from './types'
 
-type Page = 'history' | 'stats' | 'categories'
+type Page = 'stats' | 'trends' | 'history' | 'categories'
 
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
@@ -102,6 +103,8 @@ export default function App() {
         <div className="flex items-center justify-center pt-20 text-muted text-sm">Loading entries…</div>
       ) : page === 'stats' ? (
         <Stats entries={entries} categories={categories} onLogEntry={openModal} />
+      ) : page === 'trends' ? (
+        <Trends entries={entries} />
       ) : page === 'history' ? (
         <History entries={entries} onDelete={deleteEntry} onEdit={openEditModal} />
       ) : (
