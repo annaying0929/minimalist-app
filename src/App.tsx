@@ -52,11 +52,11 @@ export default function App() {
 
   // Reset seen flag when user is no longer debt-free so banner can trigger again next time
   useEffect(() => {
-    if (!isDebtFree && debtFreeSeen) {
+    if (!isDebtFree && entries.length > 0 && debtFreeSeen) {
       localStorage.removeItem('debtFreeSeen')
       setDebtFreeSeen(false)
     }
-  }, [isDebtFree])
+  }, [isDebtFree, entries.length])
 
   const showDebtFree = isDebtFree && entries.length > 0 && !debtFreeSeen
 
