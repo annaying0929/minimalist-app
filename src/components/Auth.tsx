@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 interface Props {
-  onEnterDemo: () => void
+  onBackToDemo: () => void
 }
 
-export function Auth({ onEnterDemo }: Props) {
+export function Auth({ onBackToDemo }: Props) {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -133,12 +133,11 @@ export function Auth({ onEnterDemo }: Props) {
 
         {!done && (
           <div className="text-center mt-5">
-            <div className="text-[11px] text-muted mb-2">Not sure yet?</div>
             <button
-              onClick={onEnterDemo}
-              className="text-[13px] font-medium text-accent hover:opacity-75 transition-opacity"
+              onClick={onBackToDemo}
+              className="text-[12px] text-muted hover:text-accent transition-colors"
             >
-              Explore a demo household →
+              ← Back to demo
             </button>
           </div>
         )}

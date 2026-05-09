@@ -21,8 +21,9 @@ type Page = 'stats' | 'trends' | 'history' | 'categories'
 
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
-  const [isDemoMode, setIsDemoMode] = useState(() => localStorage.getItem('demoMode') === 'true')
+  const [showAuth, setShowAuth] = useState(false)
   const [demoPromptOpen, setDemoPromptOpen] = useState(false)
+  const isDemoMode = !session
   const [page, setPage] = useState<Page>('stats')
   const [modalOpen, setModalOpen] = useState(false)
   const [modalCategoryId, setModalCategoryId] = useState<string | undefined>()
@@ -65,15 +66,13 @@ export default function App() {
 
   const showDebtFree = isDebtFree && entries.length > 0 && !debtFreeSeen
 
-  function enterDemo() {
-    setIsDemoMode(true)
-    localStorage.setItem('demoMode', 'true')
+  function goToAuth() {
+    setShowAuth(true)
+    setDemoPromptOpen(false)
   }
 
-  function exitDemo() {
-    setIsDemoMode(false)
-    localStorage.removeItem('demoMode')
-    setDemoPromptOpen(false)
+  function backToDemo() {
+    setShowAuth(false)
   }
 
   function openModal(categoryId?: string) {
@@ -109,12 +108,12 @@ export default function App() {
     )
   }
 
-  if (!session && !isDemoMode) return <Auth onEnterDemo={enterDemo} />
+  if (session === null && showAuth) return <Auth onBackToDemo={backToDemo} />
 
   return (
     <div className="min-h-screen bg-bg font-sans">
-      <Nav onSignOut={isDemoMode ? exitDemo : () => supabase.auth.signOut()} />
-      {isDemoMode && <DemoBanner onSignIn={exitDemo} />}
+      <Nav isDemoMode={isDemoMode} onSignIn={goToAuth} onSignOut={() => supabase.auth.signOut()} />
+      {isDemoMode && <DemoBanner onSignIn={goToAuth} />}
       {saveError && (
         <div className="bg-warn-lt border-b border-warn/20 text-warn text-[12px] text-center py-2 px-4">
           {saveError} — check your internet connection and try again.
@@ -150,7 +149,7 @@ export default function App() {
               Create your own household account to log entries and build your own history.
             </p>
             <button
-              onClick={exitDemo}
+              onClick={goToAuth}
               className="w-full bg-accent text-white py-2.5 rounded-lg text-[13px] font-medium hover:opacity-90 transition-opacity mb-2"
             >
               Create an account
