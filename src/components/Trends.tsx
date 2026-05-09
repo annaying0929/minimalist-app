@@ -1,9 +1,22 @@
 import { useMemo } from 'react'
 import type { Entry } from '../types'
+import { useCategories } from '../context/CategoryContext'
 
 interface Props {
   entries: Entry[]
 }
+
+const DISCARD_PRAISE = [
+  'Leading the household clear-out',
+  'Keeping it lean — well done',
+  'Great discipline in this category',
+]
+
+const WATCH_NUDGE = [
+  'Most room to let go — pick one thing',
+  'A few items could find a new home',
+  'Worth a mindful second look',
+]
 
 function getMonthKey(iso: string) {
   const d = new Date(iso)
@@ -16,6 +29,32 @@ function monthLabel(key: string) {
 }
 
 export function Trends({ entries }: Props) {
+  const { categories } = useCategories()
+
+  const topDiscarded = useMemo(() => {
+    const totals: Record<string, number> = {}
+    for (const e of entries) {
+      if (e.type === 'discarded') totals[e.categoryId] = (totals[e.categoryId] ?? 0) + e.quantity
+    }
+    return categories
+      .filter(c => (totals[c.id] ?? 0) > 0)
+      .map(c => ({ ...c, total: totals[c.id]! }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 3)
+  }, [entries, categories])
+
+  const watchList = useMemo(() => {
+    const debt: Record<string, number> = {}
+    for (const e of entries) {
+      debt[e.categoryId] = (debt[e.categoryId] ?? 0) + (e.type === 'bought' ? e.quantity : -e.quantity)
+    }
+    return categories
+      .filter(c => (debt[c.id] ?? 0) > 0)
+      .map(c => ({ ...c, debt: debt[c.id]! }))
+      .sort((a, b) => b.debt - a.debt)
+      .slice(0, 3)
+  }, [entries, categories])
+
   const chartData = useMemo(() => {
     const now = new Date()
     const months: string[] = []
@@ -103,7 +142,7 @@ export function Trends({ entries }: Props) {
 
       {/* Per-month breakdown */}
       <h2 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-3">Monthly breakdown</h2>
-      <div className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden mb-8">
         {chartData.slice().reverse().map((d, i) => {
           const net = d.discarded - d.bought
           return (
@@ -124,6 +163,62 @@ export function Trends({ entries }: Props) {
           )
         })}
       </div>
+
+      {/* Top 3 most discarded */}
+      {topDiscarded.length > 0 && (
+        <>
+          <h2 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-3">Leading the clear-out</h2>
+          <div className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden mb-8">
+            {topDiscarded.map((cat, i) => (
+              <div
+                key={cat.id}
+                className={`flex items-center gap-4 px-5 py-4 ${i < topDiscarded.length - 1 ? 'border-b border-border' : ''}`}
+              >
+                <div className="w-6 h-6 rounded-full bg-accent/15 flex items-center justify-center shrink-0">
+                  <span className="text-[11px] font-bold text-accent">#{i + 1}</span>
+                </div>
+                <span className="text-base leading-none">{cat.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-medium text-ink truncate">{cat.name}</div>
+                  <div className="text-[11px] text-muted mt-0.5">{DISCARD_PRAISE[i]}</div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-[15px] font-semibold text-accent">{cat.total}</div>
+                  <div className="text-[10px] text-muted">discarded</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Watch list — top 3 categories in debt */}
+      {watchList.length > 0 && (
+        <>
+          <h2 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-3">Watch list</h2>
+          <div className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
+            {watchList.map((cat, i) => (
+              <div
+                key={cat.id}
+                className={`flex items-center gap-4 px-5 py-4 ${i < watchList.length - 1 ? 'border-b border-border' : ''}`}
+              >
+                <div className="w-6 h-6 rounded-full bg-warn/15 flex items-center justify-center shrink-0">
+                  <span className="text-[11px] font-bold text-warn">#{i + 1}</span>
+                </div>
+                <span className="text-base leading-none">{cat.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-medium text-ink truncate">{cat.name}</div>
+                  <div className="text-[11px] text-muted mt-0.5">{WATCH_NUDGE[i]}</div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-[15px] font-semibold text-warn">+{cat.debt}</div>
+                  <div className="text-[10px] text-muted">in debt</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </main>
   )
 }
