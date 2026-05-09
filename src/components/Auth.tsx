@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-export function Auth() {
+interface Props {
+  onEnterDemo: () => void
+}
+
+export function Auth({ onEnterDemo }: Props) {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -125,6 +129,18 @@ export function Auth() {
           <p className="text-center text-[11px] text-muted mt-4">
             Share the same email & password with your partner so you both see the same data.
           </p>
+        )}
+
+        {!done && (
+          <div className="text-center mt-5">
+            <div className="text-[11px] text-muted mb-2">Not sure yet?</div>
+            <button
+              onClick={onEnterDemo}
+              className="text-[13px] font-medium text-accent hover:opacity-75 transition-opacity"
+            >
+              Explore a demo household →
+            </button>
+          </div>
         )}
       </div>
     </div>

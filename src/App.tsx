@@ -12,13 +12,17 @@ import { CategorySettings } from './components/CategorySettings'
 import { LogModal } from './components/LogModal'
 import { CelebrationModal } from './components/CelebrationModal'
 import { DebtFreeBanner } from './components/DebtFreeBanner'
+import { DemoBanner } from './components/DemoBanner'
 import { Auth } from './components/Auth'
+import { SEED_ENTRIES } from './data/seedEntries'
 import type { DiscardMethod, Entry, EntryType } from './types'
 
 type Page = 'stats' | 'trends' | 'history' | 'categories'
 
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
+  const [isDemoMode, setIsDemoMode] = useState(() => localStorage.getItem('demoMode') === 'true')
+  const [demoPromptOpen, setDemoPromptOpen] = useState(false)
   const [page, setPage] = useState<Page>('stats')
   const [modalOpen, setModalOpen] = useState(false)
   const [modalCategoryId, setModalCategoryId] = useState<string | undefined>()
@@ -26,7 +30,8 @@ export default function App() {
   const [celebrationEntry, setCelebrationEntry] = useState<Entry | null>(null)
   const [celebrationDebt, setCelebrationDebt] = useState(0)
   const [debtFreeSeen, setDebtFreeSeen] = useState(() => localStorage.getItem('debtFreeSeen') === 'true')
-  const { entries, loading, saveError, addEntry, updateEntry, deleteEntry } = useStore(session?.user.id)
+  const { entries: realEntries, loading, saveError, addEntry, updateEntry, deleteEntry } = useStore(session?.user.id)
+  const entries = isDemoMode ? SEED_ENTRIES : realEntries
   const { categories, deleteCategory } = useCategories()
 
   useEffect(() => {
@@ -60,6 +65,17 @@ export default function App() {
 
   const showDebtFree = isDebtFree && entries.length > 0 && !debtFreeSeen
 
+  function enterDemo() {
+    setIsDemoMode(true)
+    localStorage.setItem('demoMode', 'true')
+  }
+
+  function exitDemo() {
+    setIsDemoMode(false)
+    localStorage.removeItem('demoMode')
+    setDemoPromptOpen(false)
+  }
+
   function openModal(categoryId?: string) {
     setEditEntry(undefined)
     setModalCategoryId(categoryId)
@@ -72,6 +88,10 @@ export default function App() {
   }
 
   function handleSave(entry: { type: EntryType; categoryId: string; name: string; quantity: number; estimatedValue: number; discardMethod: DiscardMethod | null; donationValue: number }) {
+    if (isDemoMode) {
+      setDemoPromptOpen(true)
+      return
+    }
     addEntry(entry)
     if (entry.type === 'discarded') {
       const debtAfter = Math.max(0, (debtMap[entry.categoryId] ?? 0) - entry.quantity)
@@ -89,11 +109,12 @@ export default function App() {
     )
   }
 
-  if (!session) return <Auth />
+  if (!session && !isDemoMode) return <Auth onEnterDemo={enterDemo} />
 
   return (
     <div className="min-h-screen bg-bg font-sans">
-      <Nav onSignOut={() => supabase.auth.signOut()} />
+      <Nav onSignOut={isDemoMode ? exitDemo : () => supabase.auth.signOut()} />
+      {isDemoMode && <DemoBanner onSignIn={exitDemo} />}
       {saveError && (
         <div className="bg-warn-lt border-b border-warn/20 text-warn text-[12px] text-center py-2 px-4">
           {saveError} — check your internet connection and try again.
@@ -106,12 +127,43 @@ export default function App() {
       ) : page === 'trends' ? (
         <Trends entries={entries} />
       ) : page === 'history' ? (
-        <History entries={entries} onDelete={deleteEntry} onEdit={openEditModal} />
+        <History
+          entries={entries}
+          onDelete={isDemoMode ? () => setDemoPromptOpen(true) : deleteEntry}
+          onEdit={isDemoMode ? () => setDemoPromptOpen(true) : openEditModal}
+        />
       ) : (
         <CategorySettings />
       )}
 
       <BottomNav page={page} onPageChange={setPage} onLogEntry={() => openModal()} />
+
+      {demoPromptOpen && (
+        <div
+          className="fixed inset-0 bg-black/35 z-50 flex items-center justify-center p-4"
+          onClick={e => { if (e.target === e.currentTarget) setDemoPromptOpen(false) }}
+        >
+          <div className="bg-surface rounded-2xl p-7 w-full max-w-sm shadow-2xl text-center">
+            <div className="text-3xl mb-3">🏡</div>
+            <h3 className="text-base font-semibold mb-2">Ready to start tracking?</h3>
+            <p className="text-[13px] text-muted mb-6 leading-relaxed">
+              Create your own household account to log entries and build your own history.
+            </p>
+            <button
+              onClick={exitDemo}
+              className="w-full bg-accent text-white py-2.5 rounded-lg text-[13px] font-medium hover:opacity-90 transition-opacity mb-2"
+            >
+              Create an account
+            </button>
+            <button
+              onClick={() => setDemoPromptOpen(false)}
+              className="w-full py-2.5 rounded-lg text-[13px] text-muted hover:text-ink transition-colors"
+            >
+              Keep exploring
+            </button>
+          </div>
+        </div>
+      )}
 
       <CelebrationModal
         entry={celebrationEntry}
