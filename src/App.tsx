@@ -45,6 +45,13 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
+  useEffect(() => {
+    if (session === null) {
+      setOnboardingDone(false)
+      setShowAuth(false)
+    }
+  }, [session])
+
   const debtMap = useMemo(() => {
     const map: Record<string, number> = {}
     for (const e of entries) {
