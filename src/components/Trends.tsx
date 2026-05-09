@@ -21,14 +21,15 @@ export function Trends({ entries }: Props) {
   const { categories } = useCategories()
 
   const topDiscarded = useMemo(() => {
-    const totals: Record<string, number> = {}
+    const net: Record<string, number> = {}
     for (const e of entries) {
-      if (e.type === 'discarded') totals[e.categoryId] = (totals[e.categoryId] ?? 0) + e.quantity
+      net[e.categoryId] = (net[e.categoryId] ?? 0) + (e.type === 'bought' ? e.quantity : -e.quantity)
     }
+    // net < 0 means discarded more than bought
     return categories
-      .filter(c => (totals[c.id] ?? 0) > 0)
-      .map(c => ({ ...c, total: totals[c.id]! }))
-      .sort((a, b) => b.total - a.total)
+      .filter(c => (net[c.id] ?? 0) < 0)
+      .map(c => ({ ...c, surplus: -(net[c.id]!) }))
+      .sort((a, b) => b.surplus - a.surplus)
       .slice(0, 3)
   }, [entries, categories])
 
@@ -144,7 +145,7 @@ export function Trends({ entries }: Props) {
                 <span className="text-[10px] font-bold text-accent w-5 shrink-0">#{i + 1}</span>
                 <span className="text-sm leading-none shrink-0">{cat.icon}</span>
                 <span className="flex-1 text-[11px] font-medium text-ink truncate">{cat.name}</span>
-                <span className="text-[12px] font-semibold text-accent shrink-0">{cat.total}</span>
+                <span className="text-[12px] font-semibold text-accent shrink-0">+{cat.surplus}</span>
               </div>
             ))}
           </div>
