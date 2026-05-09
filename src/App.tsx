@@ -13,6 +13,7 @@ import { LogModal } from './components/LogModal'
 import { CelebrationModal } from './components/CelebrationModal'
 import { DebtFreeBanner } from './components/DebtFreeBanner'
 import { DemoBanner } from './components/DemoBanner'
+import { Onboarding } from './components/Onboarding'
 import { Auth } from './components/Auth'
 import { SEED_ENTRIES } from './data/seedEntries'
 import type { DiscardMethod, Entry, EntryType } from './types'
@@ -21,6 +22,7 @@ type Page = 'stats' | 'trends' | 'history' | 'categories'
 
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
+  const [onboardingDone, setOnboardingDone] = useState(() => localStorage.getItem('onboardingDone') === 'true')
   const [showAuth, setShowAuth] = useState(false)
   const [demoPromptOpen, setDemoPromptOpen] = useState(false)
   const isDemoMode = !session
@@ -107,6 +109,13 @@ export default function App() {
       </div>
     )
   }
+
+  if (session === null && !onboardingDone) return (
+    <Onboarding
+      onSignUp={() => { localStorage.setItem('onboardingDone', 'true'); setOnboardingDone(true); setShowAuth(true) }}
+      onExploreDemo={() => { localStorage.setItem('onboardingDone', 'true'); setOnboardingDone(true) }}
+    />
+  )
 
   if (session === null && showAuth) return <Auth onBackToDemo={backToDemo} />
 
