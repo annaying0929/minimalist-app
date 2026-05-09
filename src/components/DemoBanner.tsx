@@ -12,7 +12,7 @@ export function DemoBanner({ onSignIn }: Props) {
         onClick={onSignIn}
         className="text-[12px] font-semibold text-accent hover:opacity-70 transition-opacity shrink-0"
       >
-        Sign in to track yours →
+        Create an account or sign in →
       </button>
     </div>
   )
