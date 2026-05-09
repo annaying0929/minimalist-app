@@ -22,7 +22,7 @@ type Page = 'stats' | 'trends' | 'history' | 'categories'
 
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
-  const [onboardingDone, setOnboardingDone] = useState(() => localStorage.getItem('onboardingDone') === 'true')
+  const [onboardingDone, setOnboardingDone] = useState(false)
   const [showAuth, setShowAuth] = useState(false)
   const [demoPromptOpen, setDemoPromptOpen] = useState(false)
   const isDemoMode = !session
@@ -112,8 +112,8 @@ export default function App() {
 
   if (session === null && !onboardingDone) return (
     <Onboarding
-      onSignUp={() => { localStorage.setItem('onboardingDone', 'true'); setOnboardingDone(true); setShowAuth(true) }}
-      onExploreDemo={() => { localStorage.setItem('onboardingDone', 'true'); setOnboardingDone(true) }}
+      onSignUp={() => { setOnboardingDone(true); setShowAuth(true) }}
+      onExploreDemo={() => setOnboardingDone(true)}
     />
   )
 
@@ -122,7 +122,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-bg font-sans">
       <Nav isDemoMode={isDemoMode} onSignIn={goToAuth} onSignOut={() => supabase.auth.signOut()} />
-      {isDemoMode && <DemoBanner onSignIn={goToAuth} />}
+      {isDemoMode && <DemoBanner onSignIn={goToAuth} onBackToIntro={() => setOnboardingDone(false)} />}
       {saveError && (
         <div className="bg-warn-lt border-b border-warn/20 text-warn text-[12px] text-center py-2 px-4">
           {saveError} — check your internet connection and try again.
