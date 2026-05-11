@@ -5,6 +5,7 @@ import { CategoryDetailModal } from './CategoryDetailModal'
 
 interface Props {
   entries: Entry[]
+  onLogEntry: (categoryId?: string, initialType?: 'bought' | 'discarded') => void
 }
 
 
@@ -20,7 +21,7 @@ function monthLabel(key: string) {
 
 const COLLAPSED_ROWS = 3
 
-export function Trends({ entries }: Props) {
+export function Trends({ entries, onLogEntry }: Props) {
   const { categories } = useCategories()
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
   const [leadersExpanded, setLeadersExpanded] = useState(false)
@@ -213,6 +214,7 @@ export function Trends({ entries }: Props) {
         category={selectedCategory}
         entries={entries}
         onClose={() => setSelectedCategory(null)}
+        onLogDiscard={(id) => { setSelectedCategory(null); onLogEntry(id, 'discarded') }}
       />
 
       {/* Per-month breakdown */}

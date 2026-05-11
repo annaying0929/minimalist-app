@@ -5,6 +5,7 @@ interface Props {
   category: Category | null
   entries: Entry[]
   onClose: () => void
+  onLogDiscard?: (categoryId: string) => void
 }
 
 function getMonthKey(iso: string) {
@@ -25,7 +26,7 @@ function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
 
-export function CategoryDetailModal({ category, entries, onClose }: Props) {
+export function CategoryDetailModal({ category, entries, onClose, onLogDiscard }: Props) {
   const catEntries = useMemo(() => {
     if (!category) return []
     return entries.filter(e => e.categoryId === category.id)
@@ -220,6 +221,15 @@ export function CategoryDetailModal({ category, entries, onClose }: Props) {
               </div>
               <p className="text-[13px] leading-relaxed text-ink">{insight}</p>
             </div>
+          )}
+
+          {stats.debt > 0 && onLogDiscard && (
+            <button
+              onClick={() => { onClose(); onLogDiscard(category.id) }}
+              className="w-full py-3 bg-warn text-white rounded-xl text-[13px] font-semibold hover:opacity-90 transition-opacity"
+            >
+              Log a discard in {category.name}
+            </button>
           )}
 
           <div className="pb-8" />

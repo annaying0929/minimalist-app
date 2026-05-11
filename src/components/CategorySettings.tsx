@@ -2,6 +2,11 @@ import { useState } from 'react'
 import { useCategories } from '../context/CategoryContext'
 import { IconPicker } from './IconPicker'
 
+interface Props {
+  caps: Record<string, number>
+  setCap: (categoryId: string, cap: number | null) => void
+}
+
 
 const BG_COLOR_GROUPS = [
   {
@@ -95,12 +100,13 @@ function applyBg(value: string) {
   localStorage.setItem('bg-color', value)
 }
 
-export function CategorySettings() {
+export function CategorySettings({ caps, setCap }: Props) {
   const { categories, deletedCategories, builtinIds, updateCategory, addCategory, deleteCategory, restoreCategory } = useCategories()
   const [activeBg, setActiveBg] = useState(getActiveBg)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editIcon, setEditIcon] = useState('')
+  const [editCap, setEditCap] = useState('')
   const [newName, setNewName] = useState('')
   const [newIcon, setNewIcon] = useState('')
 
@@ -113,11 +119,14 @@ export function CategorySettings() {
     setEditingId(cat.id)
     setEditName(cat.name)
     setEditIcon(cat.icon)
+    setEditCap(caps[cat.id] ? String(caps[cat.id]) : '')
   }
 
   function saveEdit() {
     if (editingId && editName.trim()) {
       updateCategory(editingId, editName.trim(), editIcon || '📦')
+      const capNum = parseInt(editCap)
+      setCap(editingId, isNaN(capNum) || capNum <= 0 ? null : capNum)
     }
     setEditingId(null)
   }
@@ -186,7 +195,17 @@ export function CategorySettings() {
                       onChange={e => setEditName(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && saveEdit()}
                       autoFocus
+                      placeholder="Category name"
                       className="flex-1 px-3 py-1.5 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent"
+                    />
+                    <input
+                      value={editCap}
+                      onChange={e => setEditCap(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && saveEdit()}
+                      placeholder="Max"
+                      type="number"
+                      min="1"
+                      className="w-16 px-2 py-1.5 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent text-center"
                     />
                     <button
                       onClick={saveEdit}
@@ -197,11 +216,15 @@ export function CategorySettings() {
                       className="text-[12px] text-muted px-2 py-1.5 hover:text-[#1C1C1A] whitespace-nowrap"
                     >Cancel</button>
                   </div>
+                  <div className="text-[10px] text-muted">Max items = item cap for this category (optional)</div>
                 </div>
               ) : (
                 <>
                   <span className="text-xl w-8 text-center flex-shrink-0">{cat.icon}</span>
                   <span className="flex-1 text-[13px] font-medium">{cat.name}</span>
+                  {caps[cat.id] && (
+                    <span className="text-[10px] text-muted bg-bg border border-border rounded-full px-2 py-0.5 mr-1">max {caps[cat.id]}</span>
+                  )}
                   {!builtinIds.has(cat.id) && (
                     <span className="text-[10px] text-muted bg-bg border border-border rounded-full px-2 py-0.5 mr-1">custom</span>
                   )}

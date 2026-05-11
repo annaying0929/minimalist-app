@@ -7,6 +7,7 @@ type SaveFields = { type: EntryType; categoryId: string; name: string; quantity:
 interface Props {
   open: boolean;
   initialCategoryId?: string;
+  initialType?: EntryType;
   editEntry?: Entry;
   onClose: () => void;
   onSave: (entry: SaveFields) => void;
@@ -15,7 +16,7 @@ interface Props {
   debtMap: Record<string, number>;
 }
 
-export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, onUpdate, onDeleteCategory, debtMap }: Props) {
+export function LogModal({ open, initialCategoryId, initialType, editEntry, onClose, onSave, onUpdate, onDeleteCategory, debtMap }: Props) {
   const { categories } = useCategories();
   const [type, setType] = useState<EntryType>('bought');
   const [discardMethod, setDiscardMethod] = useState<DiscardMethod>('thrown');
@@ -43,11 +44,11 @@ export function LogModal({ open, initialCategoryId, editEntry, onClose, onSave, 
         setQuantity('1');
         setValue('');
         setDonationValue('');
-        setType('bought');
+        setType(initialType ?? 'bought');
         setDiscardMethod('thrown');
       }
     }
-  }, [open, initialCategoryId, editEntry]);
+  }, [open, initialCategoryId, initialType, editEntry]);
 
   const selectedCat = categories.find(c => c.id === categoryId);
   const debt = debtMap[categoryId] ?? 0;

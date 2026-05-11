@@ -5,7 +5,8 @@ import { CategoryCard } from './CategoryCard'
 interface Props {
   entries: Entry[]
   categories: Category[]
-  onLogEntry: (categoryId?: string) => void
+  caps: Record<string, number>
+  onLogEntry: (categoryId?: string, initialType?: 'bought' | 'discarded') => void
 }
 
 interface Badge {
@@ -20,7 +21,7 @@ function fmt(n: number) {
   return `£ ${n.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
 }
 
-export function Stats({ entries, categories, onLogEntry }: Props) {
+export function Stats({ entries, categories, caps, onLogEntry }: Props) {
   const financials = useMemo(() => {
     let totalSpent = 0, totalDiscardedValue = 0, totalDonationResale = 0, totalDonatedItems = 0
     for (const e of entries) {
@@ -121,7 +122,9 @@ export function Stats({ entries, categories, onLogEntry }: Props) {
             key={cat.id}
             category={cat}
             entries={entries}
+            cap={caps[cat.id]}
             onLogEntry={() => onLogEntry(cat.id)}
+            onLogDiscard={() => onLogEntry(cat.id, 'discarded')}
           />
         ))}
         <button

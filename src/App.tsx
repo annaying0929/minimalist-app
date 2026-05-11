@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
 import { useStore } from './hooks/useStore'
+import { useCaps } from './hooks/useCaps'
 import { useCategories } from './context/CategoryContext'
 import { Nav } from './components/Nav'
 import { BottomNav } from './components/BottomNav'
@@ -11,6 +12,7 @@ import { Trends } from './components/Trends'
 import { CategorySettings } from './components/CategorySettings'
 import { LogModal } from './components/LogModal'
 import { CelebrationModal } from './components/CelebrationModal'
+import { MonthlyRecapModal } from './components/MonthlyRecapModal'
 import { DebtFreeBanner } from './components/DebtFreeBanner'
 import { DemoBanner } from './components/DemoBanner'
 import { Onboarding } from './components/Onboarding'
@@ -29,13 +31,17 @@ export default function App() {
   const [page, setPage] = useState<Page>('stats')
   const [modalOpen, setModalOpen] = useState(false)
   const [modalCategoryId, setModalCategoryId] = useState<string | undefined>()
+  const [modalInitialType, setModalInitialType] = useState<EntryType>('bought')
   const [editEntry, setEditEntry] = useState<Entry | undefined>()
+  const [recapMonthKey, setRecapMonthKey] = useState<string | null>(null)
+  const [showRecap, setShowRecap] = useState(false)
   const [celebrationEntry, setCelebrationEntry] = useState<Entry | null>(null)
   const [celebrationDebt, setCelebrationDebt] = useState(0)
   const [debtFreeSeen, setDebtFreeSeen] = useState(() => localStorage.getItem('debtFreeSeen') === 'true')
   const { entries: realEntries, loading, saveError, addEntry, updateEntry, deleteEntry } = useStore(session?.user.id)
   const entries = isDemoMode ? SEED_ENTRIES : realEntries
   const { categories, deleteCategory } = useCategories()
+  const { caps, setCap } = useCaps()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
@@ -65,6 +71,19 @@ export default function App() {
     return categories.every(cat => (debtMap[cat.id] ?? 0) <= 0)
   }, [entries, categories, debtMap])
 
+  // Show monthly recap on first visit of a new month (logged-in users only, after entries load)
+  useEffect(() => {
+    if (isDemoMode || loading) return
+    const now = new Date()
+    const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    const lastSeen = localStorage.getItem('lastSeenMonth')
+    if (lastSeen && lastSeen !== currentKey) {
+      setRecapMonthKey(lastSeen)
+      setShowRecap(true)
+    }
+    localStorage.setItem('lastSeenMonth', currentKey)
+  }, [loading, isDemoMode])
+
   // Reset seen flag when user is no longer debt-free so banner can trigger again next time
   useEffect(() => {
     if (!isDebtFree && entries.length > 0 && debtFreeSeen) {
@@ -84,9 +103,10 @@ export default function App() {
     setShowAuth(false)
   }
 
-  function openModal(categoryId?: string) {
+  function openModal(categoryId?: string, initialType: EntryType = 'bought') {
     setEditEntry(undefined)
     setModalCategoryId(categoryId)
+    setModalInitialType(initialType)
     setModalOpen(true)
   }
 
@@ -138,9 +158,9 @@ export default function App() {
       {loading ? (
         <div className="flex items-center justify-center pt-20 text-muted text-sm">Loading entries…</div>
       ) : page === 'stats' ? (
-        <Stats entries={entries} categories={categories} onLogEntry={openModal} />
+        <Stats entries={entries} categories={categories} caps={caps} onLogEntry={openModal} />
       ) : page === 'trends' ? (
-        <Trends entries={entries} />
+        <Trends entries={entries} onLogEntry={openModal} />
       ) : page === 'history' ? (
         <History
           entries={entries}
@@ -148,7 +168,7 @@ export default function App() {
           onEdit={isDemoMode ? () => setDemoPromptOpen(true) : openEditModal}
         />
       ) : (
-        <CategorySettings />
+        <CategorySettings caps={caps} setCap={setCap} />
       )}
 
       <BottomNav page={page} onPageChange={setPage} onLogEntry={() => openModal()} />
@@ -191,6 +211,7 @@ export default function App() {
       <LogModal
         open={modalOpen}
         initialCategoryId={modalCategoryId}
+        initialType={modalInitialType}
         editEntry={editEntry}
         onClose={() => setModalOpen(false)}
         onSave={handleSave}
@@ -198,6 +219,14 @@ export default function App() {
         onDeleteCategory={deleteCategory}
         debtMap={debtMap}
       />
+      {showRecap && recapMonthKey && (
+        <MonthlyRecapModal
+          monthKey={recapMonthKey}
+          entries={entries}
+          categories={categories}
+          onClose={() => setShowRecap(false)}
+        />
+      )}
     </div>
   )
 }
