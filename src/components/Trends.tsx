@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
-import type { Entry } from '../types'
+import { useMemo, useState } from 'react'
+import type { Category, Entry } from '../types'
 import { useCategories } from '../context/CategoryContext'
+import { CategoryDetailModal } from './CategoryDetailModal'
 
 interface Props {
   entries: Entry[]
@@ -17,8 +18,13 @@ function monthLabel(key: string) {
   return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('en-GB', { month: 'short' })
 }
 
+const COLLAPSED_ROWS = 3
+
 export function Trends({ entries }: Props) {
   const { categories } = useCategories()
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+  const [leadersExpanded, setLeadersExpanded] = useState(false)
+  const [watchExpanded, setWatchExpanded] = useState(false)
 
   const topDiscarded = useMemo(() => {
     const net: Record<string, number> = {}
@@ -30,7 +36,6 @@ export function Trends({ entries }: Props) {
       .filter(c => (net[c.id] ?? 0) < 0)
       .map(c => ({ ...c, surplus: -(net[c.id]!) }))
       .sort((a, b) => b.surplus - a.surplus)
-      .slice(0, 3)
   }, [entries, categories])
 
   const watchList = useMemo(() => {
@@ -42,7 +47,6 @@ export function Trends({ entries }: Props) {
       .filter(c => (debt[c.id] ?? 0) > 0)
       .map(c => ({ ...c, debt: debt[c.id]! }))
       .sort((a, b) => b.debt - a.debt)
-      .slice(0, 3)
   }, [entries, categories])
 
   const chartData = useMemo(() => {
@@ -134,40 +138,82 @@ export function Trends({ entries }: Props) {
       {entries.length > 0 && (
         <div className="grid grid-cols-2 gap-3 mb-6">
           {/* Left: clear-out leaders */}
-          <div className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
-            <div className="px-3 py-2.5 border-b border-border">
-              <div className="text-[10px] font-semibold text-accent uppercase tracking-widest">Clear-out leaders</div>
-            </div>
-            {topDiscarded.length === 0 ? (
-              <div className="px-3 py-4 text-[11px] text-muted">No discards yet</div>
-            ) : topDiscarded.map((cat, i) => (
-              <div key={cat.id} className={`flex items-center gap-2 px-3 py-2.5 ${i < topDiscarded.length - 1 ? 'border-b border-border' : ''}`}>
-                <span className="text-[10px] font-bold text-accent w-5 shrink-0">#{i + 1}</span>
-                <span className="text-sm leading-none shrink-0">{cat.icon}</span>
-                <span className="flex-1 text-[11px] font-medium text-ink truncate">{cat.name}</span>
-                <span className="text-[12px] font-semibold text-accent shrink-0">+{cat.surplus}</span>
+          {(() => {
+            const visible = leadersExpanded ? topDiscarded : topDiscarded.slice(0, COLLAPSED_ROWS)
+            const hidden = topDiscarded.length - COLLAPSED_ROWS
+            return (
+              <div className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
+                <div className="px-3 py-2.5 border-b border-border">
+                  <div className="text-[10px] font-semibold text-accent uppercase tracking-widest">Clear-out leaders</div>
+                </div>
+                {topDiscarded.length === 0 ? (
+                  <div className="px-3 py-4 text-[11px] text-muted">No discards yet</div>
+                ) : visible.map((cat, i) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-accent/5 transition-colors ${i < visible.length - 1 || hidden > 0 ? 'border-b border-border' : ''}`}
+                  >
+                    <span className="text-[10px] font-bold text-accent w-5 shrink-0">#{i + 1}</span>
+                    <span className="text-sm leading-none shrink-0">{cat.icon}</span>
+                    <span className="flex-1 text-[11px] font-medium text-ink truncate">{cat.name}</span>
+                    <span className="text-[12px] font-semibold text-accent shrink-0">+{cat.surplus}</span>
+                  </button>
+                ))}
+                {hidden > 0 && (
+                  <button
+                    onClick={() => setLeadersExpanded(e => !e)}
+                    className="w-full px-3 py-2 text-[11px] text-accent font-medium hover:bg-accent/5 transition-colors"
+                  >
+                    {leadersExpanded ? 'Show less' : `+${hidden} more`}
+                  </button>
+                )}
               </div>
-            ))}
-          </div>
+            )
+          })()}
 
           {/* Right: watch list */}
-          <div className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
-            <div className="px-3 py-2.5 border-b border-border">
-              <div className="text-[10px] font-semibold text-warn uppercase tracking-widest">Watch list</div>
-            </div>
-            {watchList.length === 0 ? (
-              <div className="px-3 py-4 text-[11px] text-muted">All cleared up!</div>
-            ) : watchList.map((cat, i) => (
-              <div key={cat.id} className={`flex items-center gap-2 px-3 py-2.5 ${i < watchList.length - 1 ? 'border-b border-border' : ''}`}>
-                <span className="text-[10px] font-bold text-warn w-5 shrink-0">#{i + 1}</span>
-                <span className="text-sm leading-none shrink-0">{cat.icon}</span>
-                <span className="flex-1 text-[11px] font-medium text-ink truncate">{cat.name}</span>
-                <span className="text-[12px] font-semibold text-warn shrink-0">+{cat.debt}</span>
+          {(() => {
+            const visible = watchExpanded ? watchList : watchList.slice(0, COLLAPSED_ROWS)
+            const hidden = watchList.length - COLLAPSED_ROWS
+            return (
+              <div className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
+                <div className="px-3 py-2.5 border-b border-border">
+                  <div className="text-[10px] font-semibold text-warn uppercase tracking-widest">Watch list</div>
+                </div>
+                {watchList.length === 0 ? (
+                  <div className="px-3 py-4 text-[11px] text-muted">All cleared up!</div>
+                ) : visible.map((cat, i) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-warn/5 transition-colors ${i < visible.length - 1 || hidden > 0 ? 'border-b border-border' : ''}`}
+                  >
+                    <span className="text-[10px] font-bold text-warn w-5 shrink-0">#{i + 1}</span>
+                    <span className="text-sm leading-none shrink-0">{cat.icon}</span>
+                    <span className="flex-1 text-[11px] font-medium text-ink truncate">{cat.name}</span>
+                    <span className="text-[12px] font-semibold text-warn shrink-0">+{cat.debt}</span>
+                  </button>
+                ))}
+                {hidden > 0 && (
+                  <button
+                    onClick={() => setWatchExpanded(e => !e)}
+                    className="w-full px-3 py-2 text-[11px] text-warn font-medium hover:bg-warn/5 transition-colors"
+                  >
+                    {watchExpanded ? 'Show less' : `+${hidden} more`}
+                  </button>
+                )}
               </div>
-            ))}
-          </div>
+            )
+          })()}
         </div>
       )}
+
+      <CategoryDetailModal
+        category={selectedCategory}
+        entries={entries}
+        onClose={() => setSelectedCategory(null)}
+      />
 
       {/* Per-month breakdown */}
       <h2 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-3">Monthly breakdown</h2>
