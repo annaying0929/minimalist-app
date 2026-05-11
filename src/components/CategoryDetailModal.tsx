@@ -214,12 +214,15 @@ export function CategoryDetailModal({ category, entries, onClose }: Props) {
 
           {/* Insight */}
           {insight && (
-            <div className={`rounded-xl p-4 text-[12px] leading-relaxed ${stats.debt > 0 ? 'bg-warn/10 text-warn' : 'bg-accent/10 text-accent'}`}>
-              {insight}
+            <div className={`rounded-xl border p-4 ${stats.debt > 0 ? 'border-warn/25 bg-warn/5' : 'border-accent/25 bg-accent/5'}`}>
+              <div className={`text-[10px] font-semibold uppercase tracking-widest mb-1.5 ${stats.debt > 0 ? 'text-warn' : 'text-accent'}`}>
+                {stats.debt > 0 ? 'Action needed' : 'Great work'}
+              </div>
+              <p className="text-[13px] leading-relaxed text-ink">{insight}</p>
             </div>
           )}
 
-          <div className="pb-2" />
+          <div className="pb-8" />
         </div>
       </div>
     </div>
