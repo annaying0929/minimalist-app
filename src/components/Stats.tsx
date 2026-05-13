@@ -59,15 +59,17 @@ export function Stats({ entries, categories, caps, onLogEntry }: Props) {
             sub: 'thrown & donated',
             value: fmt(financials.totalLetGoValue),
             active: financials.totalLetGoValue > 0,
+            isDonation: false,
           },
           {
             icon: '🌿', label: 'Sale proceeds', type: 'sales'     as FinancialDetailType,
             sub: 'from sold items',
             value: fmt(financials.totalSaleProceeds),
             active: financials.totalSaleProceeds > 0,
+            isDonation: false,
           },
           {
-            icon: '🌱', label: 'Donation',      type: 'donations' as FinancialDetailType,
+            icon: '',   label: 'Donation',      type: 'donations' as FinancialDetailType,
             sub: financials.totalDonationResale > 0
               ? `${financials.totalDonatedItems} item${financials.totalDonatedItems !== 1 ? 's' : ''}`
               : financials.totalDonatedItems > 0 ? 'items donated' : '',
@@ -75,24 +77,42 @@ export function Stats({ entries, categories, caps, onLogEntry }: Props) {
               ? fmt(financials.totalDonationResale)
               : financials.totalDonatedItems > 0 ? String(financials.totalDonatedItems) : '—',
             active: financials.totalDonatedItems > 0,
+            isDonation: true,
           },
         ].map(card => (
           <button
             key={card.label}
             onClick={() => setDetailType(card.type)}
             className={`rounded-xl p-4 text-center shadow-sm border flex flex-col items-center justify-center gap-1 min-h-[110px] w-full transition-opacity active:opacity-70 ${
-              card.active ? 'bg-accent-lt border-accent/20' : 'bg-surface border-border'
+              card.active
+                ? card.isDonation ? 'bg-[#FAF0F3] border-[#C4849A]/20' : 'bg-accent-lt border-accent/20'
+                : 'bg-surface border-border'
             }`}
           >
-            <span className={`text-xl leading-none mb-0.5 ${card.active ? '' : 'opacity-30'}`}>{card.icon}</span>
-            <div className={`text-[21px] font-semibold tracking-tight leading-none ${card.active ? 'text-accent' : 'text-muted'}`}>
+            {card.isDonation ? (
+              <span
+                className="text-xl leading-none mb-0.5"
+                style={{ color: card.active ? '#C4849A' : '#C8C8C4', fontFamily: 'Georgia, serif' }}
+              >♥</span>
+            ) : (
+              <span className={`text-xl leading-none mb-0.5 ${card.active ? '' : 'opacity-30'}`}>{card.icon}</span>
+            )}
+            <div className={`text-[21px] font-semibold tracking-tight leading-none ${
+              card.active
+                ? card.isDonation ? 'text-[#C4849A]' : 'text-accent'
+                : 'text-muted'
+            }`}>
               {card.value}
             </div>
-            <div className={`text-[10px] font-semibold uppercase tracking-widest leading-snug mt-0.5 ${card.active ? 'text-accent/60' : 'text-muted/60'}`}>
+            <div className={`text-[10px] font-semibold uppercase tracking-widest leading-snug mt-0.5 ${
+              card.active
+                ? card.isDonation ? 'text-[#C4849A]/60' : 'text-accent/60'
+                : 'text-muted/60'
+            }`}>
               {card.label}
             </div>
             {card.sub && card.active && (
-              <div className="text-[10px] text-accent/50 leading-none">{card.sub}</div>
+              <div className={`text-[10px] leading-none ${card.isDonation ? 'text-[#C4849A]/50' : 'text-accent/50'}`}>{card.sub}</div>
             )}
           </button>
         ))}

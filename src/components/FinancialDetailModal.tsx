@@ -71,9 +71,9 @@ export function FinancialDetailModal({ type, entries, categories, onClose }: Pro
   if (!type) return null
 
   const config = {
-    letgo:     { icon: '🍂', title: 'Let go',          accent: 'accent' },
-    sales:     { icon: '🌿', title: 'Sale proceeds',    accent: 'accent' },
-    donations: { icon: '🌱', title: 'Donation impact',  accent: 'accent' },
+    letgo:     { icon: '🍂', title: 'Let go',         isDonation: false },
+    sales:     { icon: '🌿', title: 'Sale proceeds',  isDonation: false },
+    donations: { icon: '♥',  title: 'Donation impact', isDonation: true },
   }[type]
 
   return (
@@ -83,7 +83,11 @@ export function FinancialDetailModal({ type, entries, categories, onClose }: Pro
 
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-border sticky top-0 bg-bg z-10">
-          <span className="text-2xl leading-none">{config.icon}</span>
+          {config.isDonation ? (
+            <span className="text-2xl leading-none" style={{ color: '#C4849A', fontFamily: 'Georgia, serif' }}>♥</span>
+          ) : (
+            <span className="text-2xl leading-none">{config.icon}</span>
+          )}
           <h2 className="flex-1 text-[15px] font-semibold">{config.title}</h2>
           <button onClick={onClose} className="text-muted hover:text-[#1C1C1A] text-2xl leading-none w-8 h-8 flex items-center justify-center">×</button>
         </div>
@@ -177,15 +181,15 @@ export function FinancialDetailModal({ type, entries, categories, onClose }: Pro
           {donationsData && (
             <>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-accent-lt border border-accent/20 rounded-xl p-4">
-                  <div className="text-[11px] text-accent/60 uppercase tracking-widest mb-1">Items donated</div>
-                  <div className="text-[32px] font-semibold tracking-tight text-accent leading-none">
+                <div className="bg-[#FAF0F3] border border-[#C4849A]/20 rounded-xl p-4">
+                  <div className="text-[11px] uppercase tracking-widest mb-1" style={{ color: '#C4849A99' }}>Items donated</div>
+                  <div className="text-[32px] font-semibold tracking-tight leading-none" style={{ color: '#C4849A' }}>
                     {donationsData.totalItems}
                   </div>
                 </div>
-                <div className="bg-accent-lt border border-accent/20 rounded-xl p-4">
-                  <div className="text-[11px] text-accent/60 uppercase tracking-widest mb-1">Est. resale</div>
-                  <div className="text-[32px] font-semibold tracking-tight text-accent leading-none">
+                <div className="bg-[#FAF0F3] border border-[#C4849A]/20 rounded-xl p-4">
+                  <div className="text-[11px] uppercase tracking-widest mb-1" style={{ color: '#C4849A99' }}>Est. resale</div>
+                  <div className="text-[32px] font-semibold tracking-tight leading-none" style={{ color: '#C4849A' }}>
                     {fmt(donationsData.totalResale)}
                   </div>
                 </div>
