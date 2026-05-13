@@ -15,7 +15,6 @@ import { CelebrationModal } from './components/CelebrationModal'
 import { AchievementModal } from './components/AchievementModal'
 import { useAchievements } from './hooks/useAchievements'
 import { MonthlyRecapModal } from './components/MonthlyRecapModal'
-import { DebtFreeBanner } from './components/DebtFreeBanner'
 import { DemoBanner } from './components/DemoBanner'
 import { Onboarding } from './components/Onboarding'
 import { Auth } from './components/Auth'
@@ -39,7 +38,6 @@ export default function App() {
   const [showRecap, setShowRecap] = useState(false)
   const [celebrationEntry, setCelebrationEntry] = useState<Entry | null>(null)
   const [celebrationDebt, setCelebrationDebt] = useState(0)
-  const [debtFreeSeen, setDebtFreeSeen] = useState(() => localStorage.getItem('debtFreeSeen') === 'true')
   const { entries: realEntries, loading, saveError, addEntry, updateEntry, deleteEntry } = useStore(session?.user.id)
   const entries = isDemoMode ? SEED_ENTRIES : realEntries
   const { categories, deleteCategory } = useCategories()
@@ -69,11 +67,6 @@ export default function App() {
     return map
   }, [entries])
 
-  const isDebtFree = useMemo(() => {
-    if (entries.length === 0) return false
-    return categories.every(cat => (debtMap[cat.id] ?? 0) <= 0)
-  }, [entries, categories, debtMap])
-
   // Show monthly recap on first visit of a new month (logged-in users only, after entries load)
   useEffect(() => {
     if (isDemoMode || loading) return
@@ -87,15 +80,6 @@ export default function App() {
     localStorage.setItem('lastSeenMonth', currentKey)
   }, [loading, isDemoMode])
 
-  // Reset seen flag when user is no longer debt-free so banner can trigger again next time
-  useEffect(() => {
-    if (!isDebtFree && entries.length > 0 && debtFreeSeen) {
-      localStorage.removeItem('debtFreeSeen')
-      setDebtFreeSeen(false)
-    }
-  }, [isDebtFree, entries.length])
-
-  const showDebtFree = isDebtFree && entries.length > 0 && !debtFreeSeen
 
   function goToAuth() {
     setShowAuth(true)
@@ -209,9 +193,6 @@ export default function App() {
         onClose={() => setCelebrationEntry(null)}
       />
       <AchievementModal badge={pendingBadge} onClose={dismissPending} />
-      {showDebtFree && (
-        <DebtFreeBanner onClose={() => { localStorage.setItem('debtFreeSeen', 'true'); setDebtFreeSeen(true) }} />
-      )}
       <LogModal
         open={modalOpen}
         initialCategoryId={modalCategoryId}

@@ -1,4 +1,4 @@
-const CACHE = 'oioo-v6';
+const CACHE = 'oioo-v7';
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.add('/')));
