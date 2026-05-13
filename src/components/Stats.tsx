@@ -154,7 +154,7 @@ export function Stats({ entries, categories, caps, onLogEntry }: Props) {
               {b.icon}
             </span>
             <div className="min-w-0">
-              <div className="text-[13px] font-semibold truncate">{b.label}</div>
+              <div className="text-[13px] font-semibold leading-snug">{b.label}</div>
               <div className="text-[11px] text-muted leading-snug">{b.description}</div>
               {b.unlocked && (
                 <div className="text-[10px] text-accent font-semibold mt-0.5">Unlocked ✓</div>
