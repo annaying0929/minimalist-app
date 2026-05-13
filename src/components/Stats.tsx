@@ -1,7 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Category, Entry } from '../types'
 import { CategoryCard } from './CategoryCard'
 import { useAchievements } from '../hooks/useAchievements'
+import { FinancialDetailModal } from './FinancialDetailModal'
+import type { FinancialDetailType } from './FinancialDetailModal'
 
 interface Props {
   entries: Entry[]
@@ -15,6 +17,7 @@ function fmt(n: number) {
 }
 
 export function Stats({ entries, categories, caps, onLogEntry }: Props) {
+  const [detailType, setDetailType] = useState<FinancialDetailType | null>(null)
   const financials = useMemo(() => {
     let totalDiscardedValue = 0, totalDonationResale = 0, totalDonatedItems = 0, totalSaleProceeds = 0
     for (const e of entries) {
@@ -45,28 +48,26 @@ export function Stats({ entries, categories, caps, onLogEntry }: Props) {
   }, [entries, categories])
 
   return (
+    <>
     <main className="max-w-4xl mx-auto px-6 py-7 pb-28">
 
       {/* Financial summary */}
       <div className="grid grid-cols-3 gap-3 mb-7">
         {[
           {
-            icon: '🍂',
-            label: 'Let go',
+            icon: '🍂', label: 'Let go',       type: 'letgo'     as FinancialDetailType,
             sub: 'thrown & donated',
             value: fmt(financials.totalLetGoValue),
             active: financials.totalLetGoValue > 0,
           },
           {
-            icon: '🌿',
-            label: 'Sale proceeds',
+            icon: '🌿', label: 'Sale proceeds', type: 'sales'     as FinancialDetailType,
             sub: 'from sold items',
             value: fmt(financials.totalSaleProceeds),
             active: financials.totalSaleProceeds > 0,
           },
           {
-            icon: '🌱',
-            label: 'Donation',
+            icon: '🌱', label: 'Donation',      type: 'donations' as FinancialDetailType,
             sub: financials.totalDonationResale > 0
               ? `${financials.totalDonatedItems} item${financials.totalDonatedItems !== 1 ? 's' : ''}`
               : financials.totalDonatedItems > 0 ? 'items donated' : '',
@@ -76,9 +77,10 @@ export function Stats({ entries, categories, caps, onLogEntry }: Props) {
             active: financials.totalDonatedItems > 0,
           },
         ].map(card => (
-          <div
+          <button
             key={card.label}
-            className={`rounded-xl p-4 text-center shadow-sm border flex flex-col items-center justify-center gap-1 min-h-[110px] ${
+            onClick={() => setDetailType(card.type)}
+            className={`rounded-xl p-4 text-center shadow-sm border flex flex-col items-center justify-center gap-1 min-h-[110px] w-full transition-opacity active:opacity-70 ${
               card.active ? 'bg-accent-lt border-accent/20' : 'bg-surface border-border'
             }`}
           >
@@ -92,7 +94,7 @@ export function Stats({ entries, categories, caps, onLogEntry }: Props) {
             {card.sub && card.active && (
               <div className="text-[10px] text-accent/50 leading-none">{card.sub}</div>
             )}
-          </div>
+          </button>
         ))}
       </div>
 
@@ -142,5 +144,13 @@ export function Stats({ entries, categories, caps, onLogEntry }: Props) {
         ))}
       </div>
     </main>
+    <FinancialDetailModal
+      type={detailType}
+      entries={entries}
+      categories={categories}
+      onClose={() => setDetailType(null)}
+    />
+    </>
   )
 }
+
