@@ -52,7 +52,7 @@ export function useAchievements(entries: Entry[], categories: Category[]) {
 
     return [
       { id: 'first',    icon: '🍃', label: 'First discard',    description: 'Log your first discard',           unlocked: totalDiscarded >= 1 },
-      { id: 'net1',     icon: '🌱', label: 'More out than in', description: 'Discard more than you\'ve bought', unlocked: netItems >= 1 },
+      { id: 'net1',     icon: '🌱', label: 'Surplus',          description: 'Discard more than you\'ve bought', unlocked: netItems >= 1 },
       { id: 'net10',    icon: '🌿', label: 'Making space',      description: 'Net 10 more discarded than bought', unlocked: netItems >= 10 },
       { id: 'net25',    icon: '🌳', label: 'Declutter master',  description: 'Net 25 more discarded than bought', unlocked: netItems >= 25 },
       { id: 'net50',    icon: '🏔️', label: 'True minimalist',  description: 'Net 50 more discarded than bought', unlocked: netItems >= 50 },
