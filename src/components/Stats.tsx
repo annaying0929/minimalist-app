@@ -133,7 +133,7 @@ export function Stats({ entries, categories, caps, onLogEntry }: Props) {
       {/* Achievements */}
       <h2 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-3">Achievements</h2>
       <div className="grid grid-cols-2 gap-3">
-        {badges.map(b => (
+        {[...badges].sort((a, b) => Number(b.unlocked) - Number(a.unlocked)).map(b => (
           <div
             key={b.id}
             className={`bg-surface border rounded-xl p-4 shadow-sm flex items-center gap-3 ${
