@@ -77,9 +77,9 @@ export function FinancialDetailModal({ type, entries, categories, onClose }: Pro
   }[type]
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 bg-bg w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl max-h-[88vh] overflow-y-auto shadow-xl">
+      <div className="relative z-10 bg-bg w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl max-h-[90vh] overflow-y-auto shadow-xl">
 
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-border sticky top-0 bg-bg z-10">
@@ -88,7 +88,7 @@ export function FinancialDetailModal({ type, entries, categories, onClose }: Pro
           <button onClick={onClose} className="text-muted hover:text-[#1C1C1A] text-2xl leading-none w-8 h-8 flex items-center justify-center">×</button>
         </div>
 
-        <div className="px-5 py-5 space-y-5">
+        <div className="px-5 py-5 pb-10 space-y-5">
 
           {/* ── LET GO ── */}
           {letGoData && (
