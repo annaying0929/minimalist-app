@@ -227,7 +227,11 @@ export function LogModal({ open, initialCategoryId, initialType, editEntry, onCl
               />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-muted uppercase tracking-wide mb-1.5">Est. value (£)</label>
+              <label className="block text-[11px] font-medium text-muted uppercase tracking-wide mb-1.5">
+                {type === 'bought' ? (
+                  <span className="text-muted/60">Est. value (£) <span className="normal-case tracking-normal font-normal">— optional</span></span>
+                ) : 'Est. value (£)'}
+              </label>
               <input
                 type="number"
                 min={0}
@@ -235,8 +239,15 @@ export function LogModal({ open, initialCategoryId, initialType, editEntry, onCl
                 value={value}
                 onChange={e => setValue(e.target.value)}
                 placeholder="0.00"
-                className="w-full px-3 py-2.5 border border-border rounded-lg text-[13px] bg-bg focus:outline-none focus:border-accent focus:bg-white transition-colors"
+                className={`w-full px-3 py-2.5 border rounded-lg text-[13px] focus:outline-none focus:bg-white transition-colors ${
+                  type === 'bought'
+                    ? 'border-border/50 bg-bg text-muted placeholder:text-muted/40 focus:border-border'
+                    : 'border-border bg-bg focus:border-accent'
+                }`}
               />
+              {type === 'bought' && (
+                <p className="text-[10px] text-muted/50 mt-1">Fill in if you may discard it later</p>
+              )}
             </div>
           </div>
 
