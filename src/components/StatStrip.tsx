@@ -47,10 +47,14 @@ export function StatStrip({ entries }: Props) {
     {
       label: 'Total discarded',
       value: stats.totalDiscarded,
-      sub: stats.totalSaleProceeds > 0
-        ? `${fmt(stats.totalSaleProceeds)} from sales`
-        : `${fmt(stats.totalDiscardedValue)} estimated value`,
+      sub: `${fmt(stats.totalDiscardedValue)} estimated value`,
       valueClass: 'text-accent',
+    },
+    {
+      label: 'Sale proceeds',
+      value: fmt(stats.totalSaleProceeds),
+      sub: 'from sold items',
+      valueClass: stats.totalSaleProceeds > 0 ? 'text-warn' : 'text-[#1C1C1A]',
     },
     {
       label: 'Net cost',
@@ -61,7 +65,7 @@ export function StatStrip({ entries }: Props) {
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-7">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-7">
       {cards.map(card => (
         <div key={card.label} className="bg-surface border border-border rounded-xl p-4 shadow-sm">
           <div className="text-[11px] text-muted uppercase tracking-wide mb-1.5">{card.label}</div>
