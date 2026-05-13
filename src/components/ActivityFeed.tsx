@@ -46,6 +46,7 @@ export function ActivityFeed({ entries, onDelete, onEdit }: Props) {
         const cat = categories.find(c => c.id === entry.categoryId);
         const isBought = entry.type === 'bought';
         const isDonated = entry.discardMethod === 'donated';
+        const isSold = entry.discardMethod === 'sold';
         const confirming = confirmId === entry.id;
         return (
           <div
@@ -59,8 +60,8 @@ export function ActivityFeed({ entries, onDelete, onEdit }: Props) {
               <div className="text-[13px] font-medium truncate">{entry.name}</div>
               <div className="text-[11px] text-muted mt-0.5 flex items-center gap-1.5">
                 {!isBought && (
-                  <span className={`font-medium ${isDonated ? 'text-accent' : 'text-muted'}`}>
-                    {isDonated ? '💚 Donated' : '🗑️ Thrown'}
+                  <span className={`font-medium ${isDonated ? 'text-accent' : isSold ? 'text-warn' : 'text-muted'}`}>
+                    {isDonated ? '💚 Donated' : isSold ? '💰 Sold' : '🗑️ Thrown'}
                   </span>
                 )}
                 {!isBought && <span>·</span>}
@@ -75,6 +76,10 @@ export function ActivityFeed({ entries, onDelete, onEdit }: Props) {
               {isDonated && entry.donationValue > 0 ? (
                 <div className="text-[11px] text-accent mt-0.5">
                   💚 £ {entry.donationValue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} resale
+                </div>
+              ) : isSold && entry.saleValue > 0 ? (
+                <div className="text-[11px] text-warn mt-0.5">
+                  💰 £ {entry.saleValue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} received
                 </div>
               ) : (
                 <div className="text-[11px] text-muted mt-0.5">{relativeDate(entry.date)}</div>

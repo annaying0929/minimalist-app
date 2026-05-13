@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { DiscardMethod, Entry, EntryType } from '../types';
 import { useCategories } from '../context/CategoryContext';
 
-type SaveFields = { type: EntryType; categoryId: string; name: string; quantity: number; estimatedValue: number; discardMethod: DiscardMethod | null; donationValue: number };
+type SaveFields = { type: EntryType; categoryId: string; name: string; quantity: number; estimatedValue: number; discardMethod: DiscardMethod | null; donationValue: number; saleValue: number };
 
 interface Props {
   open: boolean;
@@ -25,6 +25,7 @@ export function LogModal({ open, initialCategoryId, initialType, editEntry, onCl
   const [quantity, setQuantity] = useState('1');
   const [value, setValue] = useState('');
   const [donationValue, setDonationValue] = useState('');
+  const [saleValue, setSaleValue] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
@@ -38,12 +39,14 @@ export function LogModal({ open, initialCategoryId, initialType, editEntry, onCl
         setQuantity(String(editEntry.quantity));
         setValue(editEntry.estimatedValue > 0 ? String(editEntry.estimatedValue) : '');
         setDonationValue(editEntry.donationValue > 0 ? String(editEntry.donationValue) : '');
+        setSaleValue(editEntry.saleValue > 0 ? String(editEntry.saleValue) : '');
       } else {
         setCategoryId(initialCategoryId ?? categories[0]?.id ?? '');
         setName('');
         setQuantity('1');
         setValue('');
         setDonationValue('');
+        setSaleValue('');
         setType(initialType ?? 'bought');
         setDiscardMethod('thrown');
       }
@@ -67,6 +70,7 @@ export function LogModal({ open, initialCategoryId, initialType, editEntry, onCl
       estimatedValue: parseFloat(value) || 0,
       discardMethod: type === 'discarded' ? discardMethod : null,
       donationValue: type === 'discarded' && discardMethod === 'donated' ? parseFloat(donationValue) || 0 : 0,
+      saleValue: type === 'discarded' && discardMethod === 'sold' ? parseFloat(saleValue) || 0 : 0,
     };
     if (editEntry && onUpdate) {
       onUpdate(editEntry.id, fields);
@@ -156,8 +160,8 @@ export function LogModal({ open, initialCategoryId, initialType, editEntry, onCl
 
         {/* Discard method sub-toggle */}
         {type === 'discarded' && (
-          <div className="grid grid-cols-2 bg-bg rounded-lg p-0.5 mb-5">
-            {(['thrown', 'donated'] as DiscardMethod[]).map(m => (
+          <div className="grid grid-cols-3 bg-bg rounded-lg p-0.5 mb-5">
+            {(['thrown', 'donated', 'sold'] as DiscardMethod[]).map(m => (
               <button
                 key={m}
                 type="button"
@@ -166,7 +170,7 @@ export function LogModal({ open, initialCategoryId, initialType, editEntry, onCl
                   discardMethod === m ? 'bg-surface text-[#1C1C1A] shadow-sm' : 'text-muted'
                 }`}
               >
-                {m === 'thrown' ? '🗑️  Thrown away' : '💚  Donated'}
+                {m === 'thrown' ? '🗑️  Thrown' : m === 'donated' ? '💚  Donated' : '💰  Sold'}
               </button>
             ))}
           </div>
@@ -249,6 +253,23 @@ export function LogModal({ open, initialCategoryId, initialType, editEntry, onCl
                 className="w-full px-3 py-2.5 border border-accent/40 rounded-lg text-[13px] bg-accent-lt focus:outline-none focus:border-accent focus:bg-white transition-colors"
               />
               <p className="text-[11px] text-muted mt-1">What a charity shop might sell it for</p>
+            </div>
+          )}
+
+          {type === 'discarded' && discardMethod === 'sold' && (
+            <div>
+              <label className="block text-[11px] font-medium text-muted uppercase tracking-wide mb-1.5">Sale price (£)</label>
+              <input
+                required
+                type="number"
+                min={0}
+                step="0.01"
+                value={saleValue}
+                onChange={e => setSaleValue(e.target.value)}
+                placeholder="0.00"
+                className="w-full px-3 py-2.5 border border-warn/40 rounded-lg text-[13px] bg-warn-lt focus:outline-none focus:border-warn focus:bg-white transition-colors"
+              />
+              <p className="text-[11px] text-muted mt-1">What you actually sold it for</p>
             </div>
           )}
 

@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { Category, Entry } from '../types'
 import { CategoryCard } from './CategoryCard'
+import { useAchievements } from '../hooks/useAchievements'
 
 interface Props {
   entries: Entry[]
@@ -9,21 +10,13 @@ interface Props {
   onLogEntry: (categoryId?: string, initialType?: 'bought' | 'discarded') => void
 }
 
-interface Badge {
-  id: string
-  icon: string
-  label: string
-  description: string
-  unlocked: boolean
-}
-
 function fmt(n: number) {
   return `£ ${n.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
 }
 
 export function Stats({ entries, categories, caps, onLogEntry }: Props) {
   const financials = useMemo(() => {
-    let totalSpent = 0, totalDiscardedValue = 0, totalDonationResale = 0, totalDonatedItems = 0
+    let totalSpent = 0, totalDiscardedValue = 0, totalDonationResale = 0, totalDonatedItems = 0, totalSaleProceeds = 0
     for (const e of entries) {
       if (e.type === 'bought') {
         totalSpent += e.estimatedValue
@@ -33,37 +26,15 @@ export function Stats({ entries, categories, caps, onLogEntry }: Props) {
           totalDonationResale += e.donationValue
           totalDonatedItems += e.quantity
         }
+        if (e.discardMethod === 'sold') {
+          totalSaleProceeds += e.saleValue ?? 0
+        }
       }
     }
-    return { totalSpent, totalDiscardedValue, totalDonationResale, totalDonatedItems }
+    return { totalSpent, totalDiscardedValue, totalDonationResale, totalDonatedItems, totalSaleProceeds }
   }, [entries])
 
-  const totalDiscarded = useMemo(
-    () => entries.filter(e => e.type === 'discarded').reduce((s, e) => s + e.quantity, 0),
-    [entries]
-  )
-
-  const clearedCategories = useMemo(() => {
-    const bought: Record<string, number> = {}
-    const discarded: Record<string, number> = {}
-    for (const e of entries) {
-      if (e.type === 'bought') bought[e.categoryId] = (bought[e.categoryId] ?? 0) + e.quantity
-      else discarded[e.categoryId] = (discarded[e.categoryId] ?? 0) + e.quantity
-    }
-    const allIds = new Set([...Object.keys(bought), ...Object.keys(discarded)])
-    return [...allIds].filter(id => (discarded[id] ?? 0) >= (bought[id] ?? 0)).length
-  }, [entries])
-
-  const badges: Badge[] = [
-    { id: 'first', icon: '🍃', label: 'First step', description: 'Log your first discard', unlocked: totalDiscarded >= 1 },
-    { id: 'ten', icon: '🌿', label: 'Getting lighter', description: 'Discard 10 items', unlocked: totalDiscarded >= 10 },
-    { id: 'twenty', icon: '🪴', label: 'On a roll', description: 'Discard 20 items', unlocked: totalDiscarded >= 20 },
-    { id: 'fifty', icon: '🌲', label: 'Minimalist', description: 'Discard 50 items', unlocked: totalDiscarded >= 50 },
-    { id: 'hundred', icon: '🏡', label: 'Champion', description: 'Discard 100 items', unlocked: totalDiscarded >= 100 },
-    { id: 'cat1', icon: '⚖️', label: 'Balanced', description: 'Clear your first category', unlocked: clearedCategories >= 1 },
-    { id: 'cat5', icon: '🎋', label: 'Focused', description: 'Clear 5 categories', unlocked: clearedCategories >= 5 },
-    { id: 'catall', icon: '🌳', label: 'All clear', description: 'Every category balanced', unlocked: clearedCategories >= categories.length && categories.length > 0 },
-  ]
+  const { badges } = useAchievements(entries, categories)
 
   const sortedCategories = useMemo(() => {
     const discardCount: Record<string, number> = {}

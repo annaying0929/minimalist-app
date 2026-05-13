@@ -10,7 +10,7 @@ function fmt(n: number) {
 export function StatStrip({ entries }: Props) {
   const stats = useMemo(() => {
     const debtMap: Record<string, number> = {};
-    let totalBought = 0, totalDiscarded = 0, totalSpent = 0, totalDiscardedValue = 0;
+    let totalBought = 0, totalDiscarded = 0, totalSpent = 0, totalDiscardedValue = 0, totalSaleProceeds = 0;
 
     for (const e of entries) {
       if (e.type === 'bought') {
@@ -20,6 +20,7 @@ export function StatStrip({ entries }: Props) {
       } else {
         totalDiscarded += e.quantity;
         totalDiscardedValue += e.estimatedValue;
+        totalSaleProceeds += e.saleValue ?? 0;
         debtMap[e.categoryId] = (debtMap[e.categoryId] ?? 0) - e.quantity;
       }
     }
@@ -27,7 +28,7 @@ export function StatStrip({ entries }: Props) {
     const pendingItems = Object.values(debtMap).filter(d => d > 0).reduce((a, b) => a + b, 0);
     const pendingCategories = Object.values(debtMap).filter(d => d > 0).length;
 
-    return { totalBought, totalDiscarded, totalSpent, totalDiscardedValue, pendingItems, pendingCategories };
+    return { totalBought, totalDiscarded, totalSpent, totalDiscardedValue, totalSaleProceeds, pendingItems, pendingCategories };
   }, [entries]);
 
   const cards = [
@@ -46,13 +47,15 @@ export function StatStrip({ entries }: Props) {
     {
       label: 'Total discarded',
       value: stats.totalDiscarded,
-      sub: `${fmt(stats.totalDiscardedValue)} estimated value`,
+      sub: stats.totalSaleProceeds > 0
+        ? `${fmt(stats.totalSaleProceeds)} from sales`
+        : `${fmt(stats.totalDiscardedValue)} estimated value`,
       valueClass: 'text-accent',
     },
     {
-      label: 'Net cost awareness',
-      value: fmt(stats.totalSpent - stats.totalDiscardedValue),
-      sub: 'spent beyond discarded',
+      label: 'Net cost',
+      value: fmt(stats.totalSpent - stats.totalDiscardedValue - stats.totalSaleProceeds),
+      sub: 'spent minus discarded & sales',
       valueClass: 'text-[#1C1C1A]',
     },
   ];

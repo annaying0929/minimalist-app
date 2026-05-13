@@ -12,6 +12,8 @@ import { Trends } from './components/Trends'
 import { CategorySettings } from './components/CategorySettings'
 import { LogModal } from './components/LogModal'
 import { CelebrationModal } from './components/CelebrationModal'
+import { AchievementModal } from './components/AchievementModal'
+import { useAchievements } from './hooks/useAchievements'
 import { MonthlyRecapModal } from './components/MonthlyRecapModal'
 import { DebtFreeBanner } from './components/DebtFreeBanner'
 import { DemoBanner } from './components/DemoBanner'
@@ -41,6 +43,7 @@ export default function App() {
   const { entries: realEntries, loading, saveError, addEntry, updateEntry, deleteEntry } = useStore(session?.user.id)
   const entries = isDemoMode ? SEED_ENTRIES : realEntries
   const { categories, deleteCategory } = useCategories()
+  const { pendingBadge, dismissPending } = useAchievements(isDemoMode ? [] : realEntries, categories)
   const { caps, setCap } = useCaps()
 
   useEffect(() => {
@@ -115,7 +118,7 @@ export default function App() {
     setModalOpen(true)
   }
 
-  function handleSave(entry: { type: EntryType; categoryId: string; name: string; quantity: number; estimatedValue: number; discardMethod: DiscardMethod | null; donationValue: number }) {
+  function handleSave(entry: { type: EntryType; categoryId: string; name: string; quantity: number; estimatedValue: number; discardMethod: DiscardMethod | null; donationValue: number; saleValue: number }) {
     if (isDemoMode) {
       setDemoPromptOpen(true)
       return
@@ -205,6 +208,7 @@ export default function App() {
         debtAfter={celebrationDebt}
         onClose={() => setCelebrationEntry(null)}
       />
+      <AchievementModal badge={pendingBadge} onClose={dismissPending} />
       {showDebtFree && (
         <DebtFreeBanner onClose={() => { localStorage.setItem('debtFreeSeen', 'true'); setDebtFreeSeen(true) }} />
       )}

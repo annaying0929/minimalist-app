@@ -5,7 +5,7 @@ export interface Category {
 }
 
 export type EntryType = 'bought' | 'discarded';
-export type DiscardMethod = 'thrown' | 'donated';
+export type DiscardMethod = 'thrown' | 'donated' | 'sold';
 
 export interface Entry {
   id: string;
@@ -16,6 +16,7 @@ export interface Entry {
   estimatedValue: number;
   discardMethod: DiscardMethod | null; // null for bought entries
   donationValue: number;               // estimated charity resale (only when donated)
+  saleValue: number;                   // actual sale price (only when sold)
   date: string;
 }
 

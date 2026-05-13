@@ -14,6 +14,7 @@ function toEntry(row: Row): Entry {
     estimatedValue: row.estimated_value as number,
     discardMethod:  (row.discard_method as DiscardMethod | null) ?? null,
     donationValue:  (row.donation_value as number | null) ?? 0,
+    saleValue:      (row.sale_value as number | null) ?? 0,
     date:           row.date as string,
   }
 }
@@ -62,6 +63,7 @@ export function useStore(userId: string | undefined) {
       estimated_value: entry.estimatedValue,
       discard_method:  entry.discardMethod ?? null,
       donation_value:  entry.donationValue ?? 0,
+      sale_value:      entry.saleValue ?? 0,
       user_id:         userId,
     })
 
@@ -82,6 +84,7 @@ export function useStore(userId: string | undefined) {
     if (fields.estimatedValue !== undefined) dbFields.estimated_value = fields.estimatedValue
     if (fields.discardMethod !== undefined)  dbFields.discard_method  = fields.discardMethod
     if (fields.donationValue !== undefined)  dbFields.donation_value  = fields.donationValue
+    if (fields.saleValue !== undefined)      dbFields.sale_value      = fields.saleValue
     const { error } = await supabase.from('entries').update(dbFields).eq('id', id)
     if (error) console.error('Update error:', error)
   }

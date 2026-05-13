@@ -123,8 +123,8 @@ export function History({ entries, onDelete, onEdit }: Props) {
                     {entry.quantity > 1 && <span className="text-muted font-normal"> ×{entry.quantity}</span>}
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${isBought ? 'bg-warn-lt text-warn' : 'bg-accent-lt text-accent'}`}>
-                      {isBought ? 'Bought' : entry.discardMethod === 'donated' ? '💚 Donated' : '🗑️ Thrown'}
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${isBought ? 'bg-warn-lt text-warn' : entry.discardMethod === 'sold' ? 'bg-warn-lt text-warn' : 'bg-accent-lt text-accent'}`}>
+                      {isBought ? 'Bought' : entry.discardMethod === 'donated' ? '💚 Donated' : entry.discardMethod === 'sold' ? '💰 Sold' : '🗑️ Thrown'}
                     </span>
                     <span className="text-[11px] text-muted">{cat?.icon} {cat?.name ?? entry.categoryId}</span>
                   </div>
@@ -136,6 +136,11 @@ export function History({ entries, onDelete, onEdit }: Props) {
                   {entry.discardMethod === 'donated' && entry.donationValue > 0 && (
                     <div className="text-[11px] text-accent mt-0.5">
                       💚 £ {entry.donationValue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} resale
+                    </div>
+                  )}
+                  {entry.discardMethod === 'sold' && entry.saleValue > 0 && (
+                    <div className="text-[11px] text-warn mt-0.5">
+                      💰 £ {entry.saleValue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} received
                     </div>
                   )}
                 </div>
