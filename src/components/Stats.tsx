@@ -61,6 +61,16 @@ export function Stats({ entries, categories, caps, onLogEntry }: Props) {
           <div className="text-[22px] font-semibold tracking-tight text-accent">{fmt(financials.totalDiscardedValue)}</div>
           <div className="text-[11px] text-muted mt-0.5">from all discards</div>
         </div>
+        <div className="bg-surface border border-border rounded-xl p-4 shadow-sm">
+          <div className="text-[11px] text-muted uppercase tracking-wide mb-1.5">Sale proceeds</div>
+          <div className={`text-[22px] font-semibold tracking-tight ${financials.totalSaleProceeds > 0 ? 'text-warn' : 'text-[#1C1C1A]'}`}>{fmt(financials.totalSaleProceeds)}</div>
+          <div className="text-[11px] text-muted mt-0.5">from sold items</div>
+        </div>
+        <div className="bg-surface border border-border rounded-xl p-4 shadow-sm">
+          <div className="text-[11px] text-muted uppercase tracking-wide mb-1.5">Net cost</div>
+          <div className="text-[22px] font-semibold tracking-tight text-[#1C1C1A]">{fmt(financials.totalSpent - financials.totalDiscardedValue - financials.totalSaleProceeds)}</div>
+          <div className="text-[11px] text-muted mt-0.5">spent minus discarded & sales</div>
+        </div>
       </div>
 
       {/* Donation impact */}
