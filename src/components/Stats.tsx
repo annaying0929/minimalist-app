@@ -50,44 +50,27 @@ export function Stats({ entries, categories, caps, onLogEntry }: Props) {
     <main className="max-w-4xl mx-auto px-6 py-7 pb-28">
 
       {/* Financial summary */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="bg-warn-lt border border-warn/20 rounded-xl p-5 shadow-sm">
-          <div className="text-2xl mb-3">🛍️</div>
-          <div className="text-[26px] font-semibold tracking-tight text-warn leading-none mb-1">{fmt(financials.totalSpent)}</div>
-          <div className="text-[11px] text-warn/70 font-medium uppercase tracking-wide">Spent on bought</div>
+      <div className="grid grid-cols-3 gap-3 mb-7">
+        <div className="bg-warn-lt border border-warn/20 rounded-xl p-4 text-center shadow-sm flex flex-col items-center justify-center gap-1.5">
+          <div className="text-[10px] font-semibold text-warn/60 uppercase tracking-widest leading-tight">Spent on<br/>bought</div>
+          <div className="text-[22px] font-semibold tracking-tight text-warn leading-none">{fmt(financials.totalSpent)}</div>
         </div>
-        <div className={`rounded-xl p-5 shadow-sm border ${financials.totalSaleProceeds > 0 ? 'bg-warn-lt border-warn/20' : 'bg-surface border-border'}`}>
-          <div className="text-2xl mb-3">💰</div>
-          <div className={`text-[26px] font-semibold tracking-tight leading-none mb-1 ${financials.totalSaleProceeds > 0 ? 'text-warn' : 'text-muted'}`}>{fmt(financials.totalSaleProceeds)}</div>
-          <div className={`text-[11px] font-medium uppercase tracking-wide ${financials.totalSaleProceeds > 0 ? 'text-warn/70' : 'text-muted'}`}>Sale proceeds</div>
+        <div className={`rounded-xl p-4 text-center shadow-sm border flex flex-col items-center justify-center gap-1.5 ${financials.totalSaleProceeds > 0 ? 'bg-warn-lt border-warn/20' : 'bg-surface border-border'}`}>
+          <div className={`text-[10px] font-semibold uppercase tracking-widest leading-tight ${financials.totalSaleProceeds > 0 ? 'text-warn/60' : 'text-muted'}`}>Sale<br/>proceeds</div>
+          <div className={`text-[22px] font-semibold tracking-tight leading-none ${financials.totalSaleProceeds > 0 ? 'text-warn' : 'text-muted'}`}>{fmt(financials.totalSaleProceeds)}</div>
         </div>
-      </div>
-
-      {/* Donation impact */}
-      {financials.totalDonatedItems > 0 ? (
-        <div className="bg-accent-lt border border-accent/25 rounded-xl p-5 shadow-sm mb-7">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-2xl">💚</span>
-            <span className="text-[11px] text-accent font-semibold uppercase tracking-wide">Donation impact</span>
+        <div className={`rounded-xl p-4 text-center shadow-sm border flex flex-col items-center justify-center gap-1.5 ${financials.totalDonatedItems > 0 ? 'bg-accent-lt border-accent/20' : 'bg-surface border-border'}`}>
+          <div className={`text-[10px] font-semibold uppercase tracking-widest leading-tight ${financials.totalDonatedItems > 0 ? 'text-accent/60' : 'text-muted'}`}>Donation<br/>impact</div>
+          <div className={`text-[22px] font-semibold tracking-tight leading-none ${financials.totalDonatedItems > 0 ? 'text-accent' : 'text-muted'}`}>
+            {financials.totalDonationResale > 0 ? fmt(financials.totalDonationResale) : financials.totalDonatedItems > 0 ? `${financials.totalDonatedItems}` : '—'}
           </div>
-          <div className="flex items-baseline gap-2 flex-wrap">
-            <span className="text-[26px] font-semibold tracking-tight text-accent leading-none">{financials.totalDonatedItems}</span>
-            <span className="text-[13px] text-accent">item{financials.totalDonatedItems !== 1 ? 's' : ''} donated</span>
-            {financials.totalDonationResale > 0 && (
-              <>
-                <span className="text-accent/40 mx-1">·</span>
-                <span className="text-[26px] font-semibold tracking-tight text-accent leading-none">{fmt(financials.totalDonationResale)}</span>
-                <span className="text-[13px] text-accent">est. resale value</span>
-              </>
-            )}
-          </div>
-          {financials.totalDonationResale > 0 && (
-            <p className="text-[11px] text-accent/60 mt-2">Money going back into the community</p>
+          {financials.totalDonatedItems > 0 && (
+            <div className="text-[10px] text-accent/60">
+              {financials.totalDonationResale > 0 ? `${financials.totalDonatedItems} items` : 'items donated'}
+            </div>
           )}
         </div>
-      ) : (
-        <div className="mb-7" />
-      )}
+      </div>
 
       {/* Category balance grid */}
       <h2 className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-3">Category balance</h2>
