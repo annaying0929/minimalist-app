@@ -16,22 +16,21 @@ function fmt(n: number) {
 
 export function Stats({ entries, categories, caps, onLogEntry }: Props) {
   const financials = useMemo(() => {
-    let totalSpent = 0, totalDiscardedValue = 0, totalDonationResale = 0, totalDonatedItems = 0, totalSaleProceeds = 0
+    let totalDonationResale = 0, totalDonatedItems = 0, totalSaleProceeds = 0, totalLetGoValue = 0
     for (const e of entries) {
-      if (e.type === 'bought') {
-        totalSpent += e.estimatedValue
-      } else {
-        totalDiscardedValue += e.estimatedValue
+      if (e.type === 'discarded') {
         if (e.discardMethod === 'donated') {
           totalDonationResale += e.donationValue
           totalDonatedItems += e.quantity
-        }
-        if (e.discardMethod === 'sold') {
+          totalLetGoValue += e.estimatedValue
+        } else if (e.discardMethod === 'thrown') {
+          totalLetGoValue += e.estimatedValue
+        } else if (e.discardMethod === 'sold') {
           totalSaleProceeds += e.saleValue ?? 0
         }
       }
     }
-    return { totalSpent, totalDiscardedValue, totalDonationResale, totalDonatedItems, totalSaleProceeds }
+    return { totalDonationResale, totalDonatedItems, totalSaleProceeds, totalLetGoValue }
   }, [entries])
 
   const { badges } = useAchievements(entries, categories)
@@ -51,25 +50,51 @@ export function Stats({ entries, categories, caps, onLogEntry }: Props) {
 
       {/* Financial summary */}
       <div className="grid grid-cols-3 gap-3 mb-7">
-        <div className="bg-warn-lt border border-warn/20 rounded-xl p-4 text-center shadow-sm flex flex-col items-center justify-center gap-1.5">
-          <div className="text-[10px] font-semibold text-warn/60 uppercase tracking-widest leading-tight">Spent on<br/>bought</div>
-          <div className="text-[22px] font-semibold tracking-tight text-warn leading-none">{fmt(financials.totalSpent)}</div>
-        </div>
-        <div className={`rounded-xl p-4 text-center shadow-sm border flex flex-col items-center justify-center gap-1.5 ${financials.totalSaleProceeds > 0 ? 'bg-warn-lt border-warn/20' : 'bg-surface border-border'}`}>
-          <div className={`text-[10px] font-semibold uppercase tracking-widest leading-tight ${financials.totalSaleProceeds > 0 ? 'text-warn/60' : 'text-muted'}`}>Sale<br/>proceeds</div>
-          <div className={`text-[22px] font-semibold tracking-tight leading-none ${financials.totalSaleProceeds > 0 ? 'text-warn' : 'text-muted'}`}>{fmt(financials.totalSaleProceeds)}</div>
-        </div>
-        <div className={`rounded-xl p-4 text-center shadow-sm border flex flex-col items-center justify-center gap-1.5 ${financials.totalDonatedItems > 0 ? 'bg-accent-lt border-accent/20' : 'bg-surface border-border'}`}>
-          <div className={`text-[10px] font-semibold uppercase tracking-widest leading-tight ${financials.totalDonatedItems > 0 ? 'text-accent/60' : 'text-muted'}`}>Donation<br/>impact</div>
-          <div className={`text-[22px] font-semibold tracking-tight leading-none ${financials.totalDonatedItems > 0 ? 'text-accent' : 'text-muted'}`}>
-            {financials.totalDonationResale > 0 ? fmt(financials.totalDonationResale) : financials.totalDonatedItems > 0 ? `${financials.totalDonatedItems}` : '—'}
-          </div>
-          {financials.totalDonatedItems > 0 && (
-            <div className="text-[10px] text-accent/60">
-              {financials.totalDonationResale > 0 ? `${financials.totalDonatedItems} items` : 'items donated'}
+        {[
+          {
+            icon: '🍂',
+            label: 'Let go',
+            sub: 'thrown & donated',
+            value: fmt(financials.totalLetGoValue),
+            active: financials.totalLetGoValue > 0,
+          },
+          {
+            icon: '🌿',
+            label: 'Sale proceeds',
+            sub: 'from sold items',
+            value: fmt(financials.totalSaleProceeds),
+            active: financials.totalSaleProceeds > 0,
+          },
+          {
+            icon: '🌱',
+            label: 'Donation',
+            sub: financials.totalDonationResale > 0
+              ? `${financials.totalDonatedItems} item${financials.totalDonatedItems !== 1 ? 's' : ''}`
+              : financials.totalDonatedItems > 0 ? 'items donated' : '',
+            value: financials.totalDonationResale > 0
+              ? fmt(financials.totalDonationResale)
+              : financials.totalDonatedItems > 0 ? String(financials.totalDonatedItems) : '—',
+            active: financials.totalDonatedItems > 0,
+          },
+        ].map(card => (
+          <div
+            key={card.label}
+            className={`rounded-xl p-4 text-center shadow-sm border flex flex-col items-center justify-center gap-1 min-h-[110px] ${
+              card.active ? 'bg-accent-lt border-accent/20' : 'bg-surface border-border'
+            }`}
+          >
+            <span className={`text-xl leading-none mb-0.5 ${card.active ? '' : 'opacity-30'}`}>{card.icon}</span>
+            <div className={`text-[21px] font-semibold tracking-tight leading-none ${card.active ? 'text-accent' : 'text-muted'}`}>
+              {card.value}
             </div>
-          )}
-        </div>
+            <div className={`text-[10px] font-semibold uppercase tracking-widest leading-snug mt-0.5 ${card.active ? 'text-accent/60' : 'text-muted/60'}`}>
+              {card.label}
+            </div>
+            {card.sub && card.active && (
+              <div className="text-[10px] text-accent/50 leading-none">{card.sub}</div>
+            )}
+          </div>
+        ))}
       </div>
 
       {/* Category balance grid */}
