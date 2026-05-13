@@ -52,11 +52,11 @@ export function Trends({ entries, onLogEntry }: Props) {
 
   const chartData = useMemo(() => {
     const now = new Date()
-    const months: string[] = []
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
-    }
+    const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    const firstKey = entries.length > 0
+      ? [...entries].sort((a, b) => a.date.localeCompare(b.date))[0].date.slice(0, 7)
+      : currentKey
+
     const bought: Record<string, number> = {}
     const discarded: Record<string, number> = {}
     for (const e of entries) {
@@ -64,7 +64,18 @@ export function Trends({ entries, onLogEntry }: Props) {
       if (e.type === 'bought') bought[k] = (bought[k] ?? 0) + e.quantity
       else discarded[k] = (discarded[k] ?? 0) + e.quantity
     }
-    return months.map(m => ({
+
+    // Build month list from first entry up to today, capped at 6
+    const months: string[] = []
+    const [fy, fm] = firstKey.split('-').map(Number)
+    const start = new Date(fy, fm - 1, 1)
+    const end = new Date(now.getFullYear(), now.getMonth(), 1)
+    for (let d = new Date(start); d <= end; d.setMonth(d.getMonth() + 1)) {
+      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
+    }
+    const visible = months.slice(-6)
+
+    return visible.map(m => ({
       key: m,
       label: monthLabel(m),
       bought: bought[m] ?? 0,
