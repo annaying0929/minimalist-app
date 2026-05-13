@@ -16,20 +16,19 @@ function fmt(n: number) {
 
 export function Stats({ entries, categories, caps, onLogEntry }: Props) {
   const financials = useMemo(() => {
-    let totalDonationResale = 0, totalDonatedItems = 0, totalSaleProceeds = 0, totalLetGoValue = 0
+    let totalDiscardedValue = 0, totalDonationResale = 0, totalDonatedItems = 0, totalSaleProceeds = 0
     for (const e of entries) {
       if (e.type === 'discarded') {
+        totalDiscardedValue += e.estimatedValue
         if (e.discardMethod === 'donated') {
           totalDonationResale += e.donationValue
           totalDonatedItems += e.quantity
-          totalLetGoValue += e.estimatedValue
-        } else if (e.discardMethod === 'thrown') {
-          totalLetGoValue += e.estimatedValue
         } else if (e.discardMethod === 'sold') {
           totalSaleProceeds += e.saleValue ?? 0
         }
       }
     }
+    const totalLetGoValue = Math.max(0, totalDiscardedValue - totalSaleProceeds)
     return { totalDonationResale, totalDonatedItems, totalSaleProceeds, totalLetGoValue }
   }, [entries])
 
