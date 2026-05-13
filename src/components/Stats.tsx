@@ -84,9 +84,7 @@ export function Stats({ entries, categories, caps, onLogEntry }: Props) {
             key={card.label}
             onClick={() => setDetailType(card.type)}
             className={`rounded-xl p-4 text-center shadow-sm border flex flex-col items-center justify-center gap-1 min-h-[110px] w-full transition-opacity active:opacity-70 ${
-              card.active
-                ? card.isDonation ? 'bg-[#FAF0F3] border-[#C4849A]/20' : 'bg-accent-lt border-accent/20'
-                : 'bg-surface border-border'
+              card.active ? 'bg-accent-lt border-accent/20' : 'bg-surface border-border'
             }`}
           >
             {card.isDonation ? (
@@ -97,22 +95,14 @@ export function Stats({ entries, categories, caps, onLogEntry }: Props) {
             ) : (
               <span className={`text-xl leading-none mb-0.5 ${card.active ? '' : 'opacity-30'}`}>{card.icon}</span>
             )}
-            <div className={`text-[21px] font-semibold tracking-tight leading-none ${
-              card.active
-                ? card.isDonation ? 'text-[#C4849A]' : 'text-accent'
-                : 'text-muted'
-            }`}>
+            <div className={`text-[21px] font-semibold tracking-tight leading-none ${card.active ? 'text-accent' : 'text-muted'}`}>
               {card.value}
             </div>
-            <div className={`text-[10px] font-semibold uppercase tracking-widest leading-snug mt-0.5 ${
-              card.active
-                ? card.isDonation ? 'text-[#C4849A]/60' : 'text-accent/60'
-                : 'text-muted/60'
-            }`}>
+            <div className={`text-[10px] font-semibold uppercase tracking-widest leading-snug mt-0.5 ${card.active ? 'text-accent/60' : 'text-muted/60'}`}>
               {card.label}
             </div>
             {card.sub && card.active && (
-              <div className={`text-[10px] leading-none ${card.isDonation ? 'text-[#C4849A]/50' : 'text-accent/50'}`}>{card.sub}</div>
+              <div className="text-[10px] text-accent/50 leading-none">{card.sub}</div>
             )}
           </button>
         ))}

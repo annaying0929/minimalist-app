@@ -181,15 +181,15 @@ export function FinancialDetailModal({ type, entries, categories, onClose }: Pro
           {donationsData && (
             <>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-[#FAF0F3] border border-[#C4849A]/20 rounded-xl p-4">
-                  <div className="text-[11px] uppercase tracking-widest mb-1" style={{ color: '#C4849A99' }}>Items donated</div>
-                  <div className="text-[32px] font-semibold tracking-tight leading-none" style={{ color: '#C4849A' }}>
+                <div className="bg-accent-lt border border-accent/20 rounded-xl p-4">
+                  <div className="text-[11px] text-accent/60 uppercase tracking-widest mb-1">Items donated</div>
+                  <div className="text-[32px] font-semibold tracking-tight text-accent leading-none">
                     {donationsData.totalItems}
                   </div>
                 </div>
-                <div className="bg-[#FAF0F3] border border-[#C4849A]/20 rounded-xl p-4">
-                  <div className="text-[11px] uppercase tracking-widest mb-1" style={{ color: '#C4849A99' }}>Est. resale</div>
-                  <div className="text-[32px] font-semibold tracking-tight leading-none" style={{ color: '#C4849A' }}>
+                <div className="bg-accent-lt border border-accent/20 rounded-xl p-4">
+                  <div className="text-[11px] text-accent/60 uppercase tracking-widest mb-1">Est. resale</div>
+                  <div className="text-[32px] font-semibold tracking-tight text-accent leading-none">
                     {fmt(donationsData.totalResale)}
                   </div>
                 </div>
